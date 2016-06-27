@@ -1,0 +1,20 @@
+Package: wrviz
+Type: Package
+Title: Create Vizualizations For Water Resources
+Version: 0.0.0.9000
+Authors@R: person("Timothy", "Adams", email = "tbadams45@gmail.com",
+    role = c("aut", "cre"))
+Description: wrviz is a vizualation package that provides several types of
+    vizualiations found to be helpful to the Hydrosystems Research Group at
+    UMass Amherst. It aims to simplify the development of visualizations
+    by providing useful defaults, while still allowing the user to adapt the
+    vizualitions to their needs.
+License: MIT + file LICENSE
+LazyData: TRUE
+Imports:
+    ggplot2  (>= 2.1.0),
+    dplyr    (>= 0.4.3),
+    lazyeval (>= 0.2.0)
+Depends:
+    R (>= 3.3.0)
+RoxygenNote: 5.0.1
