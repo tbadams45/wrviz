@@ -161,11 +161,11 @@ get_bins <- function(metric){
     s2 <- seq(90, 130, 10)
   }
   else if (metric == "resilience") { # values range from 0 to 1
-    s1 <- c(seq(0.10, 0.60, 0.10))
+    s1 <- c(seq(0, 0.60, 0.10))
     s2 <- c(seq(0.70, 1, 0.05))
   }
   else if (metric == "vulnerability") { # values range from 0 to 1
-    s1 <- c(seq(0.10, 0.60, 0.10))
+    s1 <- c(seq(0, 0.60, 0.10))
     s2 <- c(seq(0.70,1,0.05))
   } else {
     stop("Please enter a valid metric.")
