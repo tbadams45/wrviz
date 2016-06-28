@@ -89,11 +89,9 @@ bin_color_continuous <- function(data,
   if (metric == "reliability"){
     col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
     col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-    colors  <- c(col1, col2)
   } else if (metric == "safeyield"){
     col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
     col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-    colors  <- c(col1, col2)
   } else if (metric == "resilience"){
     col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
     col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
@@ -101,7 +99,9 @@ bin_color_continuous <- function(data,
     col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
     col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
   }
- list(data = df, colors = colors)
+
+  colors  <- c(col1, col2)
+  list(data = df, colors = colors)
 }
 
 #' Get colors for binary visualizations.
