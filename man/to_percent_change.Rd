@@ -25,9 +25,8 @@ errors. Because of this, the best precision you can obtain is integers for
 your percent differences (e.g. can only get "52%", not "52.3%")
 }
 \examples{
-to_percent_change(seq(0.5,1.5,by=0.1))
+\dontrun{to_percent_change(seq(0.5,1.5,by=0.1))
 to_percent_change(seq(-0.3,0.7,by=0.1),baseline=0)
-to_percent_change(seq(0.512,1.512,by=0.1)) # answer is rounded
-
+to_percent_change(seq(0.512,1.512,by=0.1)) # answer is rounded}
 }
 

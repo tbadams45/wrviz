@@ -19,8 +19,6 @@ string.}
 
 \item{reverse}{Should values below or equal to the threshold be considered
 good?}
-
-\item{col_name}{The name of the column to be added.}
 }
 \value{
 The same dataframe, but with our additional column indicating the

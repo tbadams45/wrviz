@@ -8,13 +8,10 @@
 #'   string.
 #' @param threshold The value we evaluate our "by" column with.
 #' @param levels The values that will be used to fill the "bin" column.
-#' @param col_name The name of the column to be added.
 #' @param reverse Should values below or equal to the threshold be considered
 #'   good?
 #' @return The same dataframe, but with our additional column indicating the
 #'   bins our data falls into.
-#'
-#' @export
 bin_binary <- function(data,
                        by,
                        threshold,
@@ -67,12 +64,12 @@ bin_binary <- function(data,
 #' @return a list \code{x}. \code{x$data} returns the data frame with a new
 #'   column containing the bins, \code{x$colors} contains the corresponding
 #'   color scale.
+#' @importFrom grDevices "colorRampPalette"
+#' @importFrom stats "setNames"
 #' @examples
-#' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
-#' df$rel <- seq(40,100,length=63)
-#' df2 <- bin_continuous(df, by="rel", bins=seq(40,100,by=10))
-#'
-#' @export
+#' \dontrun{df <- expand.grid(temp = 0:8, precip = seq(0.7, 1.3, by = 0.1))
+#' df$rel <- seq(40, 100, length=63)
+#' df2 <- bin_color_continuous(df, by = "rel", metric = "reliability")}
 bin_color_continuous <- function(data,
                                  by,
                                  ascending = T,
@@ -80,7 +77,6 @@ bin_color_continuous <- function(data,
                                  binName = "bins"){
   stopifnot(is.character(by),
             is.character(binName),
-            !is.null(bins),
             !is.null(metric))
 
   bins <- get_bins(metric)
@@ -111,8 +107,6 @@ bin_color_continuous <- function(data,
 #' \code{c("royalblue4","firebrick2")}.
 #'
 #' @return A list of two colors.
-#'
-#' @export
 get_colors_binary <- function(){
   return(c("royalblue4", "firebrick2"))
 }
@@ -131,11 +125,9 @@ get_colors_binary <- function(){
 #' @param baseline The value that represents 0\% percent change.
 #' @return A list of the same length as decimal_list.
 #' @examples
-#' to_percent_change(seq(0.5,1.5,by=0.1))
+#' \dontrun{to_percent_change(seq(0.5,1.5,by=0.1))
 #' to_percent_change(seq(-0.3,0.7,by=0.1),baseline=0)
-#' to_percent_change(seq(0.512,1.512,by=0.1)) # answer is rounded
-#'
-#' @export
+#' to_percent_change(seq(0.512,1.512,by=0.1)) # answer is rounded}
 to_percent_change <- function(decimal_list, baseline = 1){
   sapply(decimal_list, function(x) round((x - baseline) * 100))
 }
@@ -148,13 +140,10 @@ to_percent_change <- function(decimal_list, baseline = 1){
 #'
 #' Currently supported metrics: reliability, safeyield.
 #'
-#' @param character; The name of the metric.
+#' @param metric character; The name of the metric.
 #' @return A list containing two sequences. These should be concatenated before
 #'   binning, but are provided separately in order to enable more advanced color
 #'   scales.
-#' @examples
-#' get_bins("reliability")
-#' get_bins("safeyield")
 get_bins <- function(metric){
 
   if (metric == "reliability"){

@@ -5,7 +5,7 @@
 \title{Create a climate heatmap.}
 \usage{
 climate_heatmap(data, metric, threshold = 90, binary = TRUE,
-  ascending = TRUE, bins = NULL, metricCol = metric)
+  ascending = TRUE, metricCol = metric)
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
@@ -21,9 +21,6 @@ scale?}
 
 \item{ascending}{logical; Do increasing values in the metric indicate
 increasingly acceptable performance?}
-
-\item{bins}{For non-binary color scales; Use this to provide a sequence that
-overrides the default bins provided for a given metric.}
 
 \item{metricCol}{character; the name of the column where the metric resides
 in \code{data}. This defaults to \code{metric}.}

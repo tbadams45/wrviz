@@ -7,7 +7,7 @@
 get_bins(metric)
 }
 \arguments{
-\item{character;}{The name of the metric.}
+\item{metric}{character; The name of the metric.}
 }
 \value{
 A list containing two sequences. These should be concatenated before
@@ -20,9 +20,5 @@ resources metrics.
 }
 \details{
 Currently supported metrics: reliability, safeyield.
-}
-\examples{
-get_bins("reliability")
-get_bins("safeyield")
 }
 
