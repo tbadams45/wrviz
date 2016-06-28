@@ -13,8 +13,9 @@ License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
     ggplot2  (>= 2.1.0),
-    dplyr    (>= 0.4.3),
-    lazyeval (>= 0.2.0)
+    dplyr    (>= 0.5.0),
+    lazyeval (>= 0.2.0),
+    magrittr (>= 1.5)
 Depends:
-    R (>= 3.3.0)
+    R (>= 3.3.1)
 RoxygenNote: 5.0.1

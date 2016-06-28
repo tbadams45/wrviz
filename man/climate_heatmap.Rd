@@ -4,18 +4,29 @@
 \alias{climate_heatmap}
 \title{Create a climate heatmap.}
 \usage{
-climate_heatmap(data, metric, threshold, binary = TRUE)
+climate_heatmap(data, metric, threshold = 90, binary = TRUE,
+  ascending = TRUE, bins = NULL, metricCol = metric)
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
 
-\item{metric}{The metric name to display in the z axis.}
+\item{metric}{character; The metric to display in the z axis. There should be
+a corresponding column name.}
 
-\item{threshold}{Either (a) the minimum acceptable performance level for a
-binary heatmap, or (b) the value where positive/negative values will
-diverge from on the color scale.}
+\item{threshold}{numeric; for binary color scales. Determines when
+performance changes from acceptable to unacceptable.}
 
-\item{binary}{Display with a binary or diverging color scale?}
+\item{binary}{logical; Should the data be represented by a binary color
+scale?}
+
+\item{ascending}{logical; Do increasing values in the metric indicate
+increasingly acceptable performance?}
+
+\item{bins}{For non-binary color scales; Use this to provide a sequence that
+overrides the default bins provided for a given metric.}
+
+\item{metricCol}{character; the name of the column where the metric resides
+in \code{data}. This defaults to \code{metric}.}
 }
 \value{
 A ggplot2 object representing the heatmap.

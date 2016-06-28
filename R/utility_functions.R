@@ -37,8 +37,8 @@ bin_binary <- function(data,
                                    t = threshold)
   }
 
-  # default new col to "bins" since idk how to call data$col_name on user given
-  # col name
+  # default new col name to "bins" since I don't know how to call data$col_name
+  # on user-given col name
   data <- data %>%
     dplyr::mutate_(.dots = setNames(list(mutate_call), c("bins")))
   data$bins[data$bins == TRUE]  <- levels[1]
@@ -47,6 +47,59 @@ bin_binary <- function(data,
     dplyr::mutate(bins = factor(bins, levels = levels, labels = levels))
 
   return(data)
+}
+
+#' Bin data and get corresponding colors.
+#'
+#' Bins data for according to a given list.
+#'
+#' Currently provides scales and colors for reliability and safeyield. To
+#' access, use \code{metric="reliability"} or \code{metric="safeyield"}.
+#'
+#'
+#'
+#' @param data The data to bin. Generally a data table.
+#' @param by Character; The name of the column to bin by.
+#' @param bins A list that defines the bins you would like to create.
+#' @param ascending logical; do increasing values indicate a positive trend?
+#' @param metric character; The name of the metric we want to create a color scale for.
+#' @param binName Character; Name of column to be created that contains bin data
+#' @return a list \code{x}. \code{x$data} returns the data frame with a new
+#'   column containing the bins, \code{x$colors} contains the corresponding
+#'   color scale.
+#' @examples
+#' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
+#' df$rel <- seq(40,100,length=63)
+#' df2 <- bin_continuous(df, by="rel", bins=seq(40,100,by=10))
+#'
+#' @export
+bin_color_continuous <- function(data,
+                                 by,
+                                 ascending = T,
+                                 metric = NULL,
+                                 binName = "bins"){
+  stopifnot(is.character(by),
+            is.character(binName),
+            !is.null(bins),
+            !is.null(metric))
+
+  bins <- get_bins(metric)
+  b <- c(bins[[1]],bins[[2]])
+  dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
+                 x = as.name(by)))
+  df <- data %>%
+    dplyr::mutate_(.dots = setNames(dots, c(binName)))
+
+  if (metric == "reliability"){
+    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
+    colors  <- c(col1, col2)
+  } else if (metric == "safeyield"){
+    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
+    colors  <- c(col1, col2)
+  }
+ list(data = df, colors = colors)
 }
 
 #' Get colors for binary visualizations.
@@ -62,26 +115,6 @@ bin_binary <- function(data,
 #' @export
 get_colors_binary <- function(){
   return(c("royalblue4", "firebrick2"))
-}
-
-#' Get colors for continuous visualizations.
-#'
-#' Returns a list of colors to be used for continuous visualizations.
-#'
-#'
-#'
-#' @param data
-#' @param baseline a baseline
-#' @param diverging logical; does this scale diverge in two directions from the baseline? If scale only increases in one direction, choose TRUE
-#' @param upward logical; do increasing values indicate a positive trend?
-#' @return A list of colors.
-#'
-#' @export
-get_colors_continuous <- function(data,
-                                  baseline,
-                                  diverging = TRUE,
-                                  upward = NULL){
-
 }
 
 #' Convert decimals difference to percent differences.
@@ -104,6 +137,35 @@ get_colors_continuous <- function(data,
 #'
 #' @export
 to_percent_change <- function(decimal_list, baseline = 1){
-  sapply(decimal_list, function(x) round((x-baseline)*100))
+  sapply(decimal_list, function(x) round((x - baseline) * 100))
 }
 
+
+#' Get bins for metrics.
+#'
+#' Generates a sequence to be used for binning, for a number of different water
+#' resources metrics.
+#'
+#' Currently supported metrics: reliability, safeyield.
+#'
+#' @param character; The name of the metric.
+#' @return A list containing two sequences. These should be concatenated before
+#'   binning, but are provided separately in order to enable more advanced color
+#'   scales.
+#' @examples
+#' get_bins("reliability")
+#' get_bins("safeyield")
+get_bins <- function(metric){
+
+  if (metric == "reliability"){
+    s1 <- c(seq(40, 90, 10), 95)
+    s2 <- seq(96, 100, 1)
+  }
+  else if (metric == "safeyield"){
+    s1 <- seq(30, 80, 10)
+    s2 <- seq(90, 130, 10)
+  } else {
+    stop("Please enter a valid metric.")
+  }
+  list(s1,s2)
+}

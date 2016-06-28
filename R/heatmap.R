@@ -17,11 +17,16 @@
 #' settings defined here.
 #'
 #' @param data The data. dataframe, data table, named matrix, etc.
-#' @param metric The metric name to display in the z axis.
-#' @param threshold Either (a) the minimum acceptable performance level for a
-#'   binary heatmap, or (b) the value where positive/negative values will
-#'   diverge from on the color scale.
-#' @param binary Display with a binary or diverging color scale?
+#' @param metric character; The metric to display in the z axis. There should be
+#'   a corresponding column name.
+#' @param threshold numeric; for binary color scales. Determines when
+#'   performance changes from acceptable to unacceptable.
+#' @param binary logical; Should the data be represented by a binary color
+#'   scale?
+#' @param ascending logical; Do increasing values in the metric indicate
+#'   increasingly acceptable performance?
+#' @param metricCol character; the name of the column where the metric resides
+#'   in \code{data}. This defaults to \code{metric}.
 #' @return A ggplot2 object representing the heatmap.
 #' @examples
 #' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
@@ -29,33 +34,51 @@
 #' climate_heatmap(df,"rel",80)
 #' climate_heatmap(df,"rel",40)
 #'
+#' @importFrom magrittr "%>%"
 #' @export
-climate_heatmap <- function(data, metric, threshold, binary=TRUE){
-  try({
+climate_heatmap <- function(data,
+                            metric,
+                            threshold = 90,
+                            binary = TRUE,
+                            ascending = TRUE,
+                            metricCol = metric){
+  try({ #catch errors in input
     names <- names(data)
     if (!(("temp" %in% names) & ("precip" %in% names))){
       stop("named 'temp' and 'precip' columns are required ",
            "for wrviz::climate_heatmap")
     }
+    stopifnot(is.character(metric),
+              is.numeric(threshold),
+              is.logical(binary),
+              is.character(metricCol))
   })
 
+
   if (binary == TRUE){
-    data   <- bin_binary(data, by = metric, threshold = threshold)
+    data   <- bin_binary(data,
+                         by = metricCol,
+                         threshold = threshold,
+                         reverse = !ascending)
     colors <- get_colors_binary()
-  } else {
-    data   <- bin_continuous(data, by = metric, threshold=threshold)
-    colors <- get_colors_continuous(baseline = threshold, diverging == TRUE)
+  } else { # continuous
+    x      <- bin_color_continuous(data,
+                                   by = metricCol,
+                                   ascending = ascending,
+                                   metric = metric)
+    data   <- x$data
+    colors <- x$colors
   }
 
-  tick   <- list(x = seq(min(data$temp),max(data$temp),1),
-                 y = seq(min(data$precip),max(data$precip),0.1))
+  tick   <- list(x = seq(min(data$temp), max(data$temp), 1),
+                 y = seq(min(data$precip), max(data$precip), 0.1))
   label  <- list(x = expression("Temperature change (" * degree * C *")"),
                  y = paste("Precipitation change (%)"))
 
   ggplot2::ggplot(data, ggplot2::aes(x = temp, y = precip)) +
     ggplot2::geom_tile(ggplot2::aes(fill = bins), color = "gray60") +
-    ggplot2::scale_x_continuous(expand=c(0,0), breaks = tick$x) +
-    ggplot2::scale_y_continuous(expand=c(0,0),
+    ggplot2::scale_x_continuous(expand = c(0, 0), breaks = tick$x) +
+    ggplot2::scale_y_continuous(expand = c(0, 0),
                                 breaks = tick$y,
                                 labels = to_percent_change(tick$y)) +
     ggplot2::scale_fill_manual(name = "Range", values = colors, drop = FALSE) +
@@ -63,5 +86,4 @@ climate_heatmap <- function(data, metric, threshold, binary=TRUE){
                                                  keyheight = 1.5,
                                                  keywidth  = 1.5)) +
     ggplot2::labs(x = label$x, y = label$y)
-
 }
