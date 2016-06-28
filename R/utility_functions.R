@@ -50,16 +50,16 @@ bin_binary <- function(data,
 #'
 #' Bins data for according to a given list.
 #'
-#' Currently provides scales and colors for reliability and safeyield. To
-#' access, use \code{metric="reliability"} or \code{metric="safeyield"}.
-#'
-#'
+#' Currently provides scales and colors for reliability, safeyield, resilience,
+#' and vulnerability. To access, use \code{metric="reliability"},
+#' \code{metric="safeyield"}, etc.
 #'
 #' @param data The data to bin. Generally a data table.
 #' @param by Character; The name of the column to bin by.
 #' @param bins A list that defines the bins you would like to create.
 #' @param ascending logical; do increasing values indicate a positive trend?
-#' @param metric character; The name of the metric we want to create a color scale for.
+#' @param metric character; The name of the metric we want to create a color
+#'   scale for.
 #' @param binName Character; Name of column to be created that contains bin data
 #' @return a list \code{x}. \code{x$data} returns the data frame with a new
 #'   column containing the bins, \code{x$colors} contains the corresponding
@@ -94,6 +94,12 @@ bin_color_continuous <- function(data,
     col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
     col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
     colors  <- c(col1, col2)
+  } else if (metric == "resilience"){
+    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
+  } else if (metric == "vulnerability"){
+    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
   }
  list(data = df, colors = colors)
 }
@@ -153,6 +159,14 @@ get_bins <- function(metric){
   else if (metric == "safeyield"){
     s1 <- seq(30, 80, 10)
     s2 <- seq(90, 130, 10)
+  }
+  else if (metric == "resilience") {
+    s1 <- c(seq(10, 60, 10))
+    s2 <- c(seq(seq(70,100,5)))
+  }
+  else if (metric == "vulnerability") {
+    s1 <- c(seq(10, 60, 10))
+    s2 <- c(seq(seq(70,100,5)))
   } else {
     stop("Please enter a valid metric.")
   }
