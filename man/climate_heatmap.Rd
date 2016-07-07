@@ -5,7 +5,7 @@
 \title{Create a climate heatmap.}
 \usage{
 climate_heatmap(data, metric, threshold = 90, binary = TRUE,
-  ascending = TRUE, metricCol = metric)
+  ascending = TRUE, metricCol = metric, bins = NULL, colorScale = NULL)
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
@@ -24,6 +24,15 @@ increasingly acceptable performance?}
 
 \item{metricCol}{character; the name of the column where the metric resides
 in \code{data}. This defaults to \code{metric}.}
+
+\item{bins}{Only used if binary == FALSE. Provide (a) a sequence that will be
+used to bin the metric, and (b) a color scale of the same length as this
+sequence. If null, this function will generate bins and an accompanying
+color scale for your metric based on a best guess.}
+
+\item{colorScale}{Provide a list representing a color scale. If binary ==
+TRUE, this list should be of length 2. Otherwise, the length should equal
+the length of bins.}
 }
 \value{
 A ggplot2 object representing the heatmap.
@@ -50,7 +59,10 @@ settings defined here.
 df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 df$rel <- seq(40,100,length=63)
 climate_heatmap(df,"rel",80)
-climate_heatmap(df,"rel",40)
+climate_heatmap(df,"reliability", binary = FALSE, metricCol = "rel")
+
+#don't use these colors in an actual plot
+climate_heatmap(df,"rel", colorScale = c("green","orange"))
 
 }
 

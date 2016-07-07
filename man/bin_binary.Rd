@@ -5,7 +5,7 @@
 \title{Bin data in a binary fashion.}
 \usage{
 bin_binary(data, by, threshold, levels = c("Acceptable", "Not Acceptable"),
-  reverse = FALSE)
+  reverse = FALSE, scale = NULL)
 }
 \arguments{
 \item{data}{The dataframe or related data structure containing the data.}
@@ -17,8 +17,12 @@ string.}
 
 \item{levels}{The values that will be used to fill the "bin" column.}
 
-\item{reverse}{Should values below or equal to the threshold be considered
+\item{reverse}{logical; Should values below or equal to the threshold be considered
 good?}
+
+\item{scale}{A list (of length 2) of custom colors to use for the plot. First
+element is for values that meet threshold, last element for those that fail
+to meet the threshold.}
 }
 \value{
 The same dataframe, but with our additional column indicating the

@@ -5,7 +5,7 @@
 \title{Bin data and get corresponding colors.}
 \usage{
 bin_color_continuous(data, by, ascending = T, metric = NULL,
-  binName = "bins")
+  binName = "bins", customBins = NULL, scale = NULL)
 }
 \arguments{
 \item{data}{The data to bin. Generally a data table.}
@@ -14,9 +14,16 @@ bin_color_continuous(data, by, ascending = T, metric = NULL,
 
 \item{ascending}{logical; do increasing values indicate a positive trend?}
 
-\item{metric}{character; The name of the metric we want to create a color scale for.}
+\item{metric}{character; The name of the metric we want to create a color
+scale for.}
 
 \item{binName}{Character; Name of column to be created that contains bin data}
+
+\item{customBins}{Sequence. Custom bins to overwrite the function's best
+guess based on your metric.}
+
+\item{scale}{list; custom color color to overwrite the function's best guess
+based on your metric.}
 
 \item{bins}{A list that defines the bins you would like to create.}
 }
@@ -29,8 +36,9 @@ a list \code{x}. \code{x$data} returns the data frame with a new
 Bins data for according to a given list.
 }
 \details{
-Currently provides scales and colors for reliability and safeyield. To
-access, use \code{metric="reliability"} or \code{metric="safeyield"}.
+Currently provides scales and colors for reliability, safeyield, resilience,
+and vulnerability. To access, use \code{metric="reliability"},
+\code{metric="safeyield"}, etc.
 }
 \examples{
 \dontrun{df <- expand.grid(temp = 0:8, precip = seq(0.7, 1.3, by = 0.1))

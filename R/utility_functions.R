@@ -8,15 +8,20 @@
 #'   string.
 #' @param threshold The value we evaluate our "by" column with.
 #' @param levels The values that will be used to fill the "bin" column.
-#' @param reverse Should values below or equal to the threshold be considered
+#' @param reverse logical; Should values below or equal to the threshold be considered
 #'   good?
+#' @param scale A list (of length 2) of custom colors to use for the plot. First
+#'   element is for values that meet threshold, last element for those that fail
+#'   to meet the threshold.
 #' @return The same dataframe, but with our additional column indicating the
 #'   bins our data falls into.
 bin_binary <- function(data,
                        by,
                        threshold,
-                       levels=c("Acceptable", "Not Acceptable"),
-                       reverse=FALSE){
+                       levels = c("Acceptable", "Not Acceptable"),
+                       reverse = FALSE,
+                       scale = NULL){
+
   stopifnot(is.character(by), length(levels) == 2, is.logical(reverse))
 
   # this final working solution using lazyeval was found on
@@ -43,7 +48,13 @@ bin_binary <- function(data,
   data <- data %>%
     dplyr::mutate(bins = factor(bins, levels = levels, labels = levels))
 
-  return(data)
+  if(is.null(scale)){
+    colors <- c("royalblue4", "firebrick2")
+  } else {
+    colors <- scale
+  }
+
+  return(list(data = data, colors = colors))
 }
 
 #' Bin data and get corresponding colors.
@@ -61,6 +72,10 @@ bin_binary <- function(data,
 #' @param metric character; The name of the metric we want to create a color
 #'   scale for.
 #' @param binName Character; Name of column to be created that contains bin data
+#' @param customBins Sequence. Custom bins to overwrite the function's best
+#'   guess based on your metric.
+#' @param scale list; custom color color to overwrite the function's best guess
+#'   based on your metric.
 #' @return a list \code{x}. \code{x$data} returns the data frame with a new
 #'   column containing the bins, \code{x$colors} contains the corresponding
 #'   color scale.
@@ -74,47 +89,48 @@ bin_color_continuous <- function(data,
                                  by,
                                  ascending = T,
                                  metric = NULL,
-                                 binName = "bins"){
+                                 binName = "bins",
+                                 customBins = NULL,
+                                 scale = NULL){
   stopifnot(is.character(by),
             is.character(binName),
             !is.null(metric))
 
-  bins <- get_bins(metric)
-  b <- c(bins[[1]],bins[[2]])
+  bins <- get_bins(metric) # best guess based on metric -- may be overwritten
+
+  if (!is.null(customBins)) { # user defines bins
+    b <- customBins
+  } else { # best guess
+    b <- c(bins[[1]],bins[[2]])
+  }
+
+  if (!is.null(scale)){ # user defines color scale
+    colors <- scale
+  } else { # best guess
+    if (metric == "reliability"){
+      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
+    } else if (metric == "safeyield"){
+      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
+    } else if (metric == "resilience"){
+      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
+    } else if (metric == "vulnerability"){
+      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
+      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
+    }
+
+    colors  <- c(col1, col2)
+  }
+
   dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
                  x = as.name(by)))
   df <- data %>%
     dplyr::mutate_(.dots = setNames(dots, c(binName)))
 
-  if (metric == "reliability"){
-    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-  } else if (metric == "safeyield"){
-    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-  } else if (metric == "resilience"){
-    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-  } else if (metric == "vulnerability"){
-    col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-  }
 
-  colors  <- c(col1, col2)
   list(data = df, colors = colors)
-}
-
-#' Get colors for binary visualizations.
-#'
-#' Returns a list of two colors to be used for binary visualizations.
-#'
-#' The first value in the list is analagous to "good", "true", etc. The second
-#' is analagous to "bad", "false", etc. Currently this is hardcoded to return
-#' \code{c("royalblue4","firebrick2")}.
-#'
-#' @return A list of two colors.
-get_colors_binary <- function(){
-  return(c("royalblue4", "firebrick2"))
 }
 
 #' Convert decimals difference to percent differences.

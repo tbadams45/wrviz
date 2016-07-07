@@ -27,12 +27,22 @@
 #'   increasingly acceptable performance?
 #' @param metricCol character; the name of the column where the metric resides
 #'   in \code{data}. This defaults to \code{metric}.
+#' @param bins Only used if binary == FALSE. Provide (a) a sequence that will be
+#'   used to bin the metric, and (b) a color scale of the same length as this
+#'   sequence. If null, this function will generate bins and an accompanying
+#'   color scale for your metric based on a best guess.
+#' @param colorScale Provide a list representing a color scale. If binary ==
+#'   TRUE, this list should be of length 2. Otherwise, the length should equal
+#'   the length of bins.
 #' @return A ggplot2 object representing the heatmap.
 #' @examples
 #' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 #' df$rel <- seq(40,100,length=63)
 #' climate_heatmap(df,"rel",80)
-#' climate_heatmap(df,"rel",40)
+#' climate_heatmap(df,"reliability", binary = FALSE, metricCol = "rel")
+#'
+#' #don't use these colors in an actual plot
+#' climate_heatmap(df,"rel", colorScale = c("green","orange"))
 #'
 #' @importFrom magrittr "%>%"
 #' @export
@@ -41,7 +51,9 @@ climate_heatmap <- function(data,
                             threshold = 90,
                             binary = TRUE,
                             ascending = TRUE,
-                            metricCol = metric){
+                            metricCol = metric,
+                            bins = NULL,
+                            colorScale = NULL){
   try({ #catch errors in input
     names <- names(data)
     if (!(("temp" %in% names) & ("precip" %in% names))){
@@ -54,20 +66,23 @@ climate_heatmap <- function(data,
               is.character(metricCol))
   })
 
-
   if (binary == TRUE){
-    data   <- bin_binary(data,
-                         by = metricCol,
-                         threshold = threshold,
-                         reverse = !ascending)
-    colors <- get_colors_binary()
+      x   <- bin_binary(data,
+                        by = metricCol,
+                        threshold = threshold,
+                        reverse = !ascending,
+                        scale = colorScale)
+      data <- x$data
+      colors <- x$colors
   } else { # continuous
-    x      <- bin_color_continuous(data,
-                                   by = metricCol,
-                                   ascending = ascending,
-                                   metric = metric)
-    data   <- x$data
-    colors <- x$colors
+      x      <- bin_color_continuous(data,
+                                     by = metricCol,
+                                     ascending = ascending,
+                                     metric = metric,
+                                     customBins = bins,
+                                     scale = colorScale)
+      data   <- x$data
+      colors <- x$colors
   }
 
   tick   <- list(x = seq(min(data$temp), max(data$temp), 1),
@@ -87,3 +102,4 @@ climate_heatmap <- function(data,
                                                  keywidth  = 1.5)) +
     ggplot2::labs(x = label$x, y = label$y)
 }
+
