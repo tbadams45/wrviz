@@ -4,6 +4,7 @@ Right now, this package only has one function: climate_heatmap. You can use this
 
 Basic example:
 ```r
+library(wrviz)
 df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 df$rel <- seq(40,100,length=63)
 climate_heatmap(df,"rel",80)
