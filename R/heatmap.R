@@ -102,4 +102,3 @@ climate_heatmap <- function(data,
                                                  keywidth  = 1.5)) +
     ggplot2::labs(x = label$x, y = label$y)
 }
-
