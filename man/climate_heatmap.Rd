@@ -5,7 +5,8 @@
 \title{Create a climate heatmap.}
 \usage{
 climate_heatmap(data, metric, threshold = 90, binary = TRUE,
-  ascending = TRUE, metricCol = metric, bins = NULL, colorScale = NULL)
+  ascending = TRUE, metricCol = metric, numBins = NULL, midpoint = NULL,
+  colorScale = NULL)
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
@@ -25,14 +26,18 @@ increasingly acceptable performance?}
 \item{metricCol}{character; the name of the column where the metric resides
 in \code{data}. This defaults to \code{metric}.}
 
-\item{bins}{Only used if binary == FALSE. Provide (a) a sequence that will be
-used to bin the metric, and (b) a color scale of the same length as this
-sequence. If null, this function will generate bins and an accompanying
-color scale for your metric based on a best guess.}
+\item{numBins}{Only used if binary == FALSE. Provide a vector of length 2,
+where the first number is the number of bins below the threshold
+(inclusive), and the second number is the number of bins above the
+treshold. Each number counts the midpoint as its own bin, so really you're
+going to have one less bin than the sum of numbers you put here.}
+
+\item{midpoint}{Only used if binary == FALSE. Sets the value where the color
+scale diverges. If NULL, defaults to middle of metric range.}
 
 \item{colorScale}{Provide a list representing a color scale. If binary ==
-TRUE, this list should be of length 2. Otherwise, the length should equal
-the length of bins.}
+TRUE, this list should be of length 2. Otherwise, the list should be length
+4, in the format c(lowest, midpoint, one-bin-above-midpoint, highest).}
 }
 \value{
 A ggplot2 object representing the heatmap.
@@ -65,4 +70,3 @@ climate_heatmap(df,"reliability", binary = FALSE, metricCol = "rel")
 climate_heatmap(df,"rel", colorScale = c("green","orange"))
 
 }
-

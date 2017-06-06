@@ -32,4 +32,3 @@ The same dataframe, but with our additional column indicating the
 Adds a "bin" column to a dataframe or related data strucutre which indicates
 whether or not another column meets a given threshold.
 }
-

@@ -29,4 +29,3 @@ your percent differences (e.g. can only get "52%", not "52.3%")
 to_percent_change(seq(-0.3,0.7,by=0.1),baseline=0)
 to_percent_change(seq(0.512,1.512,by=0.1)) # answer is rounded}
 }
-

@@ -5,7 +5,7 @@
 \title{Bin data and get corresponding colors.}
 \usage{
 bin_color_continuous(data, by, ascending = T, metric = NULL,
-  binName = "bins", customBins = NULL, scale = NULL)
+  binName = "bins", numBins = NULL, midpoint = NULL, scale = NULL)
 }
 \arguments{
 \item{data}{The data to bin. Generally a data table.}
@@ -19,11 +19,15 @@ scale for.}
 
 \item{binName}{Character; Name of column to be created that contains bin data}
 
-\item{customBins}{Sequence. Custom bins to overwrite the function's best
-guess based on your metric.}
+\item{numBins}{Vector; Provide a vector of length 2, where the first number
+is the number of bins below the threshold (inclusive), and the second
+number is the number of bins above the treshold.}
 
-\item{scale}{list; custom color color to overwrite the function's best guess
-based on your metric.}
+\item{midpoint}{Only used if binary == FALSE. Sets the value where the color
+scale diverges. If NULL, defaults to middle of metric range.}
+
+\item{scale}{List; should be length 4, in the format c(lowest, midpoint,
+one-bin-above-midpoint, highest).}
 
 \item{bins}{A list that defines the bins you would like to create.}
 }
@@ -45,4 +49,3 @@ and vulnerability. To access, use \code{metric="reliability"},
 df$rel <- seq(40, 100, length=63)
 df2 <- bin_color_continuous(df, by = "rel", metric = "reliability")}
 }
-

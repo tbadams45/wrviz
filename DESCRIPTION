@@ -1,7 +1,7 @@
 Package: wrviz
 Type: Package
 Title: Create Vizualizations For Water Resources
-Version: 0.0.1
+Version: 0.0.1.1
 Authors@R: person("Timothy", "Adams", email = "tbadams45@gmail.com",
     role = c("aut", "cre"))
 Description: wrviz is a vizualation package that provides several types of
@@ -18,7 +18,7 @@ Imports:
     magrittr (>= 1.5)
 Depends:
     R (>= 3.3.1)
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

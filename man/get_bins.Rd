@@ -21,4 +21,3 @@ resources metrics.
 \details{
 Currently supported metrics: reliability, safeyield.
 }
-
