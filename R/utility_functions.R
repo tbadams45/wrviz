@@ -49,7 +49,8 @@ bin_binary <- function(data,
     dplyr::mutate(bins = factor(bins, levels = levels, labels = levels))
 
   if(is.null(scale)){
-    colors <- c("royalblue4", "firebrick2")
+    colors <- c("#2E2ECC", "#CC2E2E") # from http://colorbrewer2.org/#type=diverging&scheme=RdBu&n=3
+    # colors <- c("royalblue4", "firebrick2")
   } else {
     colors <- scale
   }
@@ -72,10 +73,13 @@ bin_binary <- function(data,
 #' @param metric character; The name of the metric we want to create a color
 #'   scale for.
 #' @param binName Character; Name of column to be created that contains bin data
-#' @param customBins Sequence. Custom bins to overwrite the function's best
-#'   guess based on your metric.
-#' @param scale list; custom color color to overwrite the function's best guess
-#'   based on your metric.
+#' @param numBins Vector; Provide a vector of length 2, where the first number
+#'   is the number of bins below the threshold (inclusive), and the second
+#'   number is the number of bins above the treshold.
+#' @param midpoint Only used if binary == FALSE. Sets the value where the color
+#'   scale diverges. If NULL, defaults to middle of metric range.
+#' @param scale List; should be length 4, in the format c(lowest, midpoint,
+#'   one-bin-above-midpoint, highest).
 #' @return a list \code{x}. \code{x$data} returns the data frame with a new
 #'   column containing the bins, \code{x$colors} contains the corresponding
 #'   color scale.
@@ -90,39 +94,38 @@ bin_color_continuous <- function(data,
                                  ascending = T,
                                  metric = NULL,
                                  binName = "bins",
-                                 customBins = NULL,
+                                 numBins = NULL,
+                                 midpoint = NULL,
                                  scale = NULL){
   stopifnot(is.character(by),
             is.character(binName),
             !is.null(metric))
 
-  bins <- get_bins(metric) # best guess based on metric -- may be overwritten
+  metricMin <- min(data[by])
+  metricMax <- max(data[by])
 
-  if (!is.null(customBins)) { # user defines bins
-    b <- customBins
-  } else { # best guess
-    b <- c(bins[[1]],bins[[2]])
+  if(is.null(midpoint)) {
+    mid <- round((metricMin + metricMax) / 2)
   }
+  else mid <- midpoint
+
+  lowerBins <- round(seq(metricMin, mid, length.out = 5)) # 5 bins.
+  upperBins <- round(seq(mid, metricMax, length.out = 4+2)) # 4 bins.
+  if (!is.null(numBins)) { # user defines numBins
+    lowerBins <- round(seq(metricMin, mid, length.out = numBins[1]))
+    upperBins <- round(seq(mid, metricMax, length.out = numBins[2]+2))
+  }
+  b <- c(lowerBins, upperBins)
+  b <- unique(b)
 
   if (!is.null(scale)){ # user defines color scale
-    colors <- scale
+    col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lowerBins))
+    col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upperBins))
   } else { # best guess
-    if (metric == "reliability"){
-      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-    } else if (metric == "safeyield"){
-      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-    } else if (metric == "resilience"){
-      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-    } else if (metric == "vulnerability"){
-      col1 <- colorRampPalette(c("firebrick2", "white"))(length(bins[[1]]))
-      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(bins[[2]]))
-    }
-
-    colors  <- c(col1, col2)
+    col1 <- colorRampPalette(c("firebrick2", "white"))(length(lowerBins))
+    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upperBins))
   }
+  colors  <- c(col1, col2)
 
   dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
                  x = as.name(by)))

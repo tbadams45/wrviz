@@ -27,13 +27,16 @@
 #'   increasingly acceptable performance?
 #' @param metricCol character; the name of the column where the metric resides
 #'   in \code{data}. This defaults to \code{metric}.
-#' @param bins Only used if binary == FALSE. Provide (a) a sequence that will be
-#'   used to bin the metric, and (b) a color scale of the same length as this
-#'   sequence. If null, this function will generate bins and an accompanying
-#'   color scale for your metric based on a best guess.
+#' @param numBins Only used if binary == FALSE. Provide a vector of length 2,
+#'   where the first number is the number of bins below the threshold
+#'   (inclusive), and the second number is the number of bins above the
+#'   treshold. Each number counts the midpoint as its own bin, so really you're
+#'   going to have one less bin than the sum of numbers you put here.
+#' @param midpoint Only used if binary == FALSE. Sets the value where the color
+#'   scale diverges. If NULL, defaults to middle of metric range.
 #' @param colorScale Provide a list representing a color scale. If binary ==
-#'   TRUE, this list should be of length 2. Otherwise, the length should equal
-#'   the length of bins.
+#'   TRUE, this list should be of length 2. Otherwise, the list should be length
+#'   4, in the format c(lowest, midpoint, one-bin-above-midpoint, highest).
 #' @return A ggplot2 object representing the heatmap.
 #' @examples
 #' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
@@ -52,7 +55,8 @@ climate_heatmap <- function(data,
                             binary = TRUE,
                             ascending = TRUE,
                             metricCol = metric,
-                            bins = NULL,
+                            numBins = NULL,
+                            midpoint = NULL,
                             colorScale = NULL){
   try({ #catch errors in input
     names <- names(data)
@@ -79,7 +83,8 @@ climate_heatmap <- function(data,
                                      by = metricCol,
                                      ascending = ascending,
                                      metric = metric,
-                                     customBins = bins,
+                                     numBins = numBins,
+                                     midpoint = midpoint,
                                      scale = colorScale)
       data   <- x$data
       colors <- x$colors
