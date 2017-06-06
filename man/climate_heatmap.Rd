@@ -6,7 +6,7 @@
 \usage{
 climate_heatmap(data, metric, threshold = 90, binary = TRUE,
   ascending = TRUE, metricCol = metric, numBins = NULL, midpoint = NULL,
-  colorScale = NULL)
+  range = NULL, colorScale = NULL)
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
@@ -34,6 +34,9 @@ going to have one less bin than the sum of numbers you put here.}
 
 \item{midpoint}{Only used if binary == FALSE. Sets the value where the color
 scale diverges. If NULL, defaults to middle of metric range.}
+
+\item{range}{Only used if binary == FALSE. A vector of length two that
+defines the max and min value of the scale.}
 
 \item{colorScale}{Provide a list representing a color scale. If binary ==
 TRUE, this list should be of length 2. Otherwise, the list should be length

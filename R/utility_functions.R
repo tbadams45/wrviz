@@ -76,8 +76,10 @@ bin_binary <- function(data,
 #' @param numBins Vector; Provide a vector of length 2, where the first number
 #'   is the number of bins below the threshold (inclusive), and the second
 #'   number is the number of bins above the treshold.
-#' @param midpoint Only used if binary == FALSE. Sets the value where the color
-#'   scale diverges. If NULL, defaults to middle of metric range.
+#' @param midpoint Sets the value where the color scale diverges. If NULL,
+#'   defaults to middle of metric range.
+#' @param range A vector of length two that defines the max and min value of the
+#'   scale.
 #' @param scale List; should be length 4, in the format c(lowest, midpoint,
 #'   one-bin-above-midpoint, highest).
 #' @return a list \code{x}. \code{x$data} returns the data frame with a new
@@ -96,18 +98,28 @@ bin_color_continuous <- function(data,
                                  binName = "bins",
                                  numBins = NULL,
                                  midpoint = NULL,
+                                 range = NULL,
                                  scale = NULL){
   stopifnot(is.character(by),
             is.character(binName),
             !is.null(metric))
 
-  metricMin <- min(data[by])
-  metricMax <- max(data[by])
+  if(is.null(range)) {
+    metricMin <- min(data[by])
+    metricMax <- max(data[by])
+  }
+  else {
+    metricMin <- range[1]
+    metricMax <- range[2]
+  }
+
 
   if(is.null(midpoint)) {
     mid <- round((metricMin + metricMax) / 2)
   }
-  else mid <- midpoint
+  else {
+    mid <- midpoint
+  }
 
   lowerBins <- round(seq(metricMin, mid, length.out = 5)) # 5 bins.
   upperBins <- round(seq(mid, metricMax, length.out = 4+2)) # 4 bins.

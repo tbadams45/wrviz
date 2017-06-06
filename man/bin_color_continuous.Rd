@@ -5,7 +5,8 @@
 \title{Bin data and get corresponding colors.}
 \usage{
 bin_color_continuous(data, by, ascending = T, metric = NULL,
-  binName = "bins", numBins = NULL, midpoint = NULL, scale = NULL)
+  binName = "bins", numBins = NULL, midpoint = NULL, range = NULL,
+  scale = NULL)
 }
 \arguments{
 \item{data}{The data to bin. Generally a data table.}
@@ -23,8 +24,11 @@ scale for.}
 is the number of bins below the threshold (inclusive), and the second
 number is the number of bins above the treshold.}
 
-\item{midpoint}{Only used if binary == FALSE. Sets the value where the color
-scale diverges. If NULL, defaults to middle of metric range.}
+\item{midpoint}{Sets the value where the color scale diverges. If NULL,
+defaults to middle of metric range.}
+
+\item{range}{A vector of length two that defines the max and min value of the
+scale.}
 
 \item{scale}{List; should be length 4, in the format c(lowest, midpoint,
 one-bin-above-midpoint, highest).}

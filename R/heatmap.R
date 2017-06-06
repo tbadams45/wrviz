@@ -34,6 +34,8 @@
 #'   going to have one less bin than the sum of numbers you put here.
 #' @param midpoint Only used if binary == FALSE. Sets the value where the color
 #'   scale diverges. If NULL, defaults to middle of metric range.
+#' @param range Only used if binary == FALSE. A vector of length two that
+#'   defines the max and min value of the scale.
 #' @param colorScale Provide a list representing a color scale. If binary ==
 #'   TRUE, this list should be of length 2. Otherwise, the list should be length
 #'   4, in the format c(lowest, midpoint, one-bin-above-midpoint, highest).
@@ -57,6 +59,7 @@ climate_heatmap <- function(data,
                             metricCol = metric,
                             numBins = NULL,
                             midpoint = NULL,
+                            range = NULL,
                             colorScale = NULL){
   try({ #catch errors in input
     names <- names(data)
@@ -85,6 +88,7 @@ climate_heatmap <- function(data,
                                      metric = metric,
                                      numBins = numBins,
                                      midpoint = midpoint,
+                                     range = range,
                                      scale = colorScale)
       data   <- x$data
       colors <- x$colors
