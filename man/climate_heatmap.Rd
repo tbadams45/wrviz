@@ -26,7 +26,7 @@ increasingly acceptable performance?}
 \item{metricCol}{character; the name of the column where the metric resides
 in \code{data}. This defaults to \code{metric}.}
 
-\item{numBins}{Only used if binary == FALSE. Provide a vector of length 2,
+\item{numBins}{Only used if binary == FALSE. Either a single number, or a vector of length 2,
 where the first number is the number of bins below the threshold
 (inclusive), and the second number is the number of bins above the
 treshold. Each number counts the midpoint as its own bin, so really you're

@@ -27,7 +27,7 @@
 #'   increasingly acceptable performance?
 #' @param metricCol character; the name of the column where the metric resides
 #'   in \code{data}. This defaults to \code{metric}.
-#' @param numBins Only used if binary == FALSE. Provide a vector of length 2,
+#' @param numBins Only used if binary == FALSE. Either a single number, or a vector of length 2,
 #'   where the first number is the number of bins below the threshold
 #'   (inclusive), and the second number is the number of bins above the
 #'   treshold. Each number counts the midpoint as its own bin, so really you're
@@ -94,8 +94,16 @@ climate_heatmap <- function(data,
       colors <- x$colors
   }
 
-  tick   <- list(x = seq(min(data$temp), max(data$temp), 1),
-                 y = seq(min(data$precip), max(data$precip), 0.1))
+  # dynamically determine tick marks
+  t <- unique(data$temp) # remove elements that do not represent 'steps'
+  t <- abs(t[2] - t[1]) # find length of one step
+  p <- unique(data$precip)
+  p <- abs(p[2] - p[1])
+
+
+
+  tick   <- list(x = seq(min(data$temp), max(data$temp), t),
+                 y = seq(min(data$precip), max(data$precip), p))
   label  <- list(x = expression("Temperature change (" * degree * C *")"),
                  y = paste("Precipitation change (%)"))
 

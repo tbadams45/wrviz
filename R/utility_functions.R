@@ -80,7 +80,7 @@ bin_binary <- function(data,
 #'   defaults to middle of metric range.
 #' @param range A vector of length two that defines the max and min value of the
 #'   scale.
-#' @param scale List; should be length 4, in the format c(lowest, midpoint,
+#' @param scale List; should be length 4, in the format c(lowest, midpoint (white),
 #'   one-bin-above-midpoint, highest).
 #' @return a list \code{x}. \code{x$data} returns the data frame with a new
 #'   column containing the bins, \code{x$colors} contains the corresponding
@@ -102,7 +102,8 @@ bin_color_continuous <- function(data,
                                  scale = NULL){
   stopifnot(is.character(by),
             is.character(binName),
-            !is.null(metric))
+            !is.null(metric),
+            length(numBins) < 3)
 
   if(is.null(range)) {
     metricMin <- min(data[by])
@@ -113,7 +114,6 @@ bin_color_continuous <- function(data,
     metricMax <- range[2]
   }
 
-
   if(is.null(midpoint)) {
     mid <- round((metricMin + metricMax) / 2)
   }
@@ -121,23 +121,24 @@ bin_color_continuous <- function(data,
     mid <- midpoint
   }
 
-  lowerBins <- round(seq(metricMin, mid, length.out = 5)) # 5 bins.
-  upperBins <- round(seq(mid, metricMax, length.out = 4+2)) # 4 bins.
-  if (!is.null(numBins)) { # user defines numBins
-    lowerBins <- round(seq(metricMin, mid, length.out = numBins[1]))
-    upperBins <- round(seq(mid, metricMax, length.out = numBins[2]+2))
-  }
-  b <- c(lowerBins, upperBins)
-  b <- unique(b)
+  # create color scale
+    lowerBins <- round(seq(metricMin, mid, length.out = 5)) # 5 bins.
+    upperBins <- round(seq(mid, metricMax, length.out = 4+2)) # 4 bins.
+    if (!is.null(numBins)) { # user defines numBins
+      lowerBins <- round(seq(metricMin, mid, length.out = numBins[1]))
+      upperBins <- round(seq(mid, metricMax, length.out = numBins[2]+2))
+    }
+    b <- c(lowerBins, upperBins)
+    b <- unique(b)
 
-  if (!is.null(scale)){ # user defines color scale
-    col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lowerBins))
-    col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upperBins))
-  } else { # best guess
-    col1 <- colorRampPalette(c("firebrick2", "white"))(length(lowerBins))
-    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upperBins))
-  }
-  colors  <- c(col1, col2)
+    if (!is.null(scale)){ # user defines color scale
+      col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lowerBins))
+      col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upperBins))
+    } else { # best guess
+      col1 <- colorRampPalette(c("firebrick2", "white"))(length(lowerBins))
+      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upperBins))
+    }
+    colors  <- c(col1, col2)
 
   dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
                  x = as.name(by)))

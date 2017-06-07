@@ -30,7 +30,7 @@ defaults to middle of metric range.}
 \item{range}{A vector of length two that defines the max and min value of the
 scale.}
 
-\item{scale}{List; should be length 4, in the format c(lowest, midpoint,
+\item{scale}{List; should be length 4, in the format c(lowest, midpoint (white),
 one-bin-above-midpoint, highest).}
 
 \item{bins}{A list that defines the bins you would like to create.}
