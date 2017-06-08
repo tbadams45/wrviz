@@ -59,6 +59,9 @@ climate_heatmap_binary <- function(data,
   if (is.null(color_scale)) {
     colors <- c("#2E2ECC", "#CC2E2E") # from http://colorbrewer2.org/#type=diverging&scheme=RdBu&n=3
   }
+  else {
+    colors <- color_scale
+  }
 
   plot <- build_plot(
     data,
