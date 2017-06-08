@@ -96,9 +96,12 @@ bin_color_continuous <- function(data,
   stopifnot(is.character(by),
             is.character(bin_name))
 
+  if (is.null(range)) {
+    range <- get_range(data, by)
+  }
+
   if (length(bins) == 1) {
     # they gave us the number of bins they want
-    range <- get_range(data, by)
     b <- round(seq(floor(range[1]), ceiling(range[2]), length.out = bins+1))
     colors <- brewer.pal(bins, "RdBu")
 
