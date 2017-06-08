@@ -20,6 +20,9 @@
 #' @param range A vector of length two that defines the max and min value of the
 #'   scale.
 #' @param colors Provide a list representing a color scale.
+#' @param to_percent list; List of length two that says whether or not (temp,
+#'   precip) data should be treated as percent changes (e.g. 1 means 0% change,
+#'   0.9 means -10% change, 1.2 means 20% change...)
 #' @return A ggplot2 object representing the heatmap.
 #' @examples
 #' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
