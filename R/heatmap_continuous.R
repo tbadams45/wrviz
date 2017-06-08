@@ -52,46 +52,46 @@
 #' @importFrom magrittr "%>%"
 #' @export
 climate_heatmap <- function(data,
-                            metric,
-                            threshold = 90,
-                            binary = TRUE,
-                            ascending = TRUE,
-                            metricCol = metric,
-                            numBins = NULL,
-                            midpoint = NULL,
-                            range = NULL,
-                            colorScale = NULL){
+  metric,
+  threshold = 90,
+  binary = TRUE,
+  ascending = TRUE,
+  metricCol = metric,
+  numBins = NULL,
+  midpoint = NULL,
+  range = NULL,
+  colorScale = NULL){
   try({ #catch errors in input
     names <- names(data)
     if (!(("temp" %in% names) & ("precip" %in% names))){
       stop("named 'temp' and 'precip' columns are required ",
-           "for wrviz::climate_heatmap")
+        "for wrviz::climate_heatmap")
     }
     stopifnot(is.character(metric),
-              is.numeric(threshold),
-              is.logical(binary),
-              is.character(metricCol))
+      is.numeric(threshold),
+      is.logical(binary),
+      is.character(metricCol))
   })
 
   if (binary == TRUE){
-      x   <- bin_binary(data,
-                        by = metricCol,
-                        threshold = threshold,
-                        reverse = !ascending,
-                        scale = colorScale)
-      data <- x$data
-      colors <- x$colors
+    x   <- bin_binary(data,
+      by = metricCol,
+      threshold = threshold,
+      reverse = !ascending,
+      scale = colorScale)
+    data <- x$data
+    colors <- x$colors
   } else { # continuous
-      x      <- bin_color_continuous(data,
-                                     by = metricCol,
-                                     ascending = ascending,
-                                     metric = metric,
-                                     numBins = numBins,
-                                     midpoint = midpoint,
-                                     range = range,
-                                     scale = colorScale)
-      data   <- x$data
-      colors <- x$colors
+    x      <- bin_color_continuous(data,
+      by = metricCol,
+      ascending = ascending,
+      metric = metric,
+      numBins = numBins,
+      midpoint = midpoint,
+      range = range,
+      scale = colorScale)
+    data   <- x$data
+    colors <- x$colors
   }
 
   # dynamically determine tick marks
@@ -103,19 +103,19 @@ climate_heatmap <- function(data,
 
 
   tick   <- list(x = seq(min(data$temp), max(data$temp), t),
-                 y = seq(min(data$precip), max(data$precip), p))
+    y = seq(min(data$precip), max(data$precip), p))
   label  <- list(x = expression("Temperature change (" * degree * C *")"),
-                 y = paste("Precipitation change (%)"))
+    y = paste("Precipitation change (%)"))
 
   ggplot2::ggplot(data, ggplot2::aes(x = temp, y = precip)) +
     ggplot2::geom_tile(ggplot2::aes(fill = bins), color = "gray60") +
     ggplot2::scale_x_continuous(expand = c(0, 0), breaks = tick$x) +
     ggplot2::scale_y_continuous(expand = c(0, 0),
-                                breaks = tick$y,
-                                labels = to_percent_change(tick$y)) +
+      breaks = tick$y,
+      labels = to_percent_change(tick$y)) +
     ggplot2::scale_fill_manual(name = "Range", values = colors, drop = FALSE) +
     ggplot2::guides(fill = ggplot2::guide_legend(order = 2,
-                                                 keyheight = 1.5,
-                                                 keywidth  = 1.5)) +
+      keyheight = 1.5,
+      keywidth  = 1.5)) +
     ggplot2::labs(x = label$x, y = label$y)
 }

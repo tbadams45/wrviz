@@ -24,6 +24,12 @@ bin_binary <- function(data,
 
   stopifnot(is.character(by), length(levels) == 2, is.logical(reverse))
 
+  if(is.null(threshold)) {
+    metricMin <- min(data[by])
+    metricMax <- max(data[by])
+    threshold <- round((metricMin + metricMax) / 2)
+  }
+
   # this final working solution using lazyeval was found on
   # http://www.r-bloggers.com/using-mutate-from-dplyr-inside-a-function-getting-around-non-standard-evaluation/
   # Potentially helpful vignettes at
@@ -122,23 +128,23 @@ bin_color_continuous <- function(data,
   }
 
   # create color scale
-    lowerBins <- round(seq(metricMin, mid, length.out = 5)) # 5 bins.
-    upperBins <- round(seq(mid, metricMax, length.out = 4+2)) # 4 bins.
-    if (!is.null(numBins)) { # user defines numBins
-      lowerBins <- round(seq(metricMin, mid, length.out = numBins[1]))
-      upperBins <- round(seq(mid, metricMax, length.out = numBins[2]+2))
-    }
-    b <- c(lowerBins, upperBins)
-    b <- unique(b)
+  lowerBins <- round(seq(metricMin, mid, length.out = 5)) # 5 bins.
+  upperBins <- round(seq(mid, metricMax, length.out = 4+2)) # 4 bins.
+  if (!is.null(numBins)) { # user defines numBins
+    lowerBins <- round(seq(metricMin, mid, length.out = numBins[1]))
+    upperBins <- round(seq(mid, metricMax, length.out = numBins[2]+2))
+  }
+  b <- c(lowerBins, upperBins)
+  b <- unique(b)
 
-    if (!is.null(scale)){ # user defines color scale
-      col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lowerBins))
-      col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upperBins))
-    } else { # best guess
-      col1 <- colorRampPalette(c("firebrick2", "white"))(length(lowerBins))
-      col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upperBins))
-    }
-    colors  <- c(col1, col2)
+  if (!is.null(scale)){ # user defines color scale
+    col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lowerBins))
+    col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upperBins))
+  } else { # best guess
+    col1 <- colorRampPalette(c("firebrick2", "white"))(length(lowerBins))
+    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upperBins))
+  }
+  colors  <- c(col1, col2)
 
   dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
                  x = as.name(by)))
@@ -203,4 +209,48 @@ get_bins <- function(metric){
     stop("Please enter a valid metric.")
   }
   list(s1,s2)
+}
+
+#' Build plot with defaults for
+build_plot <- function(
+  data,
+  colors,
+  to_percent_y = TRUE,
+  to_percent_x = FALSE) {
+  # dynamically determine tick marks
+  t <- unique(data$temp) # remove elements that do not represent 'steps'
+  t <- abs(t[2] - t[1]) # find length of one step
+  p <- unique(data$precip)
+  p <- abs(p[2] - p[1])
+
+  tick   <- list(x = seq(min(data$temp), max(data$temp), t),
+    y = seq(min(data$precip), max(data$precip), p))
+
+  if(to_percent_x) {
+    xTickLabel <- to_percent_change(tick$x)
+  }
+  else xTickLabel <- tick$x
+
+  if(to_percent_y) {
+    yTickLabel <- to_percent_change(tick$y)
+  }
+  else yTickLabel <- tick$y
+
+  axisLabels  <- list(x = expression("Temperature change (" * degree * C *")"),
+    y = paste("Precipitation change (%)"))
+
+
+  ggplot2::ggplot(data, ggplot2::aes(x = temp, y = precip)) +
+    ggplot2::geom_tile(ggplot2::aes(fill = bins), color = "gray60") +
+    ggplot2::scale_x_continuous(expand = c(0, 0),
+      breaks = tick$x,
+      labels = xTickLabel) +
+    ggplot2::scale_y_continuous(expand = c(0, 0),
+      breaks = tick$y,
+      labels = yTickLabel) +
+    ggplot2::scale_fill_manual(name = "Range", values = colors, drop = FALSE) +
+    ggplot2::guides(fill = ggplot2::guide_legend(order = 2,
+      keyheight = 1.5,
+      keywidth  = 1.5)) +
+    ggplot2::labs(x = axisLabels$x, y = axisLabels$y)
 }
