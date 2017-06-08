@@ -111,7 +111,11 @@ bin_color_continuous <- function(data,
   } else {
     # they gave us where they want the bins cut, and they gave us a color scale
     b <- bins
-    colors <- scale
+    if(is.null(colors)) {
+      colors <- brewer.pal(length(bins), "RdBu")
+    } else {
+      colors <- scale
+    }
   }
 
 
