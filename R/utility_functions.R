@@ -103,7 +103,7 @@ bin_color_continuous <- function(data,
   if (length(bins) == 1) {
     # they gave us the number of bins they want
     b <- round(seq(floor(range[1]), ceiling(range[2]), length.out = bins+1))
-    if(is.null(colors)) {
+    if(is.null(scale)) {
       colors <- brewer.pal(bins, "RdBu")
     } else {
       colors <- scale
@@ -115,32 +115,12 @@ bin_color_continuous <- function(data,
   } else {
     # they gave us where they want the bins cut, and they gave us a color scale
     b <- bins
-    if(is.null(colors)) {
+    if(is.null(scale)) {
       colors <- brewer.pal(length(bins), "RdBu")
     } else {
       colors <- scale
     }
   }
-
-
-  # # create color scale
-  # lower_bins <- round(seq(range[1], midpoint, length.out = 5)) # 5 bins.
-  # upper_bins <- round(seq(midpoint, range[2], length.out = 4 + 2)) # 4 bins.
-  # if (!is.null(num_bins)) { # user defines num_bins
-  #   lower_bins <- round(seq(range[1], midpoint, length.out = num_bins[1]))
-  #   upper_bins <- round(seq(midpoint, range[2], length.out = num_bins[2] + 2))
-  # }
-  # b <- c(lower_bins, upper_bins)
-  # b <- unique(b)
-  #
-  # if (!is.null(scale)){ # user defines color scale
-  #   col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lower_bins))
-  #   col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upper_bins))
-  # } else { # best guess
-  #   col1 <- colorRampPalette(c("firebrick2", "white"))(length(lower_bins))
-  #   col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upper_bins))
-  # }
-  # colors  <- c(col1, col2)
 
   dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
                  x = as.name(by)))
