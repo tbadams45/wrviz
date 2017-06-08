@@ -40,7 +40,8 @@ climate_heatmap_binary <- function(data,
                             ascending = TRUE,
                             color_scale = NULL,
                             metric_col = metric,
-                            to_percent = c(FALSE, TRUE)){
+                            to_percent = c(FALSE, TRUE),
+                            z_axis_title = "Range"){
   try({ #catch errors in input
     names <- names(data)
     if (!( ("temp" %in% names) & ("precip" %in% names))){
@@ -66,7 +67,8 @@ climate_heatmap_binary <- function(data,
   plot <- build_plot(
     data,
     colors,
-    to_percent = to_percent
+    to_percent = to_percent,
+    z_axis_title = z_axis_title
   )
 
   plot

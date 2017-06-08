@@ -161,7 +161,8 @@ to_percent_change <- function(decimal_list, baseline = 1){
 build_plot <- function(
   data,
   colors,
-  to_percent = c(FALSE, TRUE)) {
+  to_percent = c(FALSE, TRUE),
+  z_axis_title = "Range") {
   # dynamically determine tick marks
   t <- unique(data$temp) # remove elements that do not represent 'steps'
   t <- abs(t[2] - t[1]) # find length of one step
@@ -192,7 +193,7 @@ build_plot <- function(
     ggplot2::scale_y_continuous(expand = c(0, 0),
       breaks = tick$y,
       labels = y_tick_label) +
-    ggplot2::scale_fill_manual(name = "Range", values = colors, drop = FALSE) +
+    ggplot2::scale_fill_manual(name = z_axis_title, values = colors, drop = FALSE) +
     ggplot2::guides(fill = ggplot2::guide_legend(order = 2,
       keyheight = 1.5,
       keywidth  = 1.5)) +
