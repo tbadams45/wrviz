@@ -103,7 +103,11 @@ bin_color_continuous <- function(data,
   if (length(bins) == 1) {
     # they gave us the number of bins they want
     b <- round(seq(floor(range[1]), ceiling(range[2]), length.out = bins+1))
-    colors <- brewer.pal(bins, "RdBu")
+    if(is.null(colors)) {
+      colors <- brewer.pal(bins, "RdBu")
+    } else {
+      colors <- scale
+    }
 
     if(ascending == FALSE) {
       colors <- rev(colors)
