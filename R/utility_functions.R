@@ -65,11 +65,8 @@ bin_binary <- function(data,
 #' \code{metric="safeyield"}, etc.
 #'
 #' @param data The data to bin. Generally a data table.
-#' @param by Character; The name of the column to bin by.
-#' @param bins A list that defines the bins you would like to create.
+#' @param by Character; The name of of our output column that we are binning.
 #' @param ascending logical; do increasing values indicate a positive trend?
-#' @param metric character; The name of the metric we want to create a color
-#'   scale for.
 #' @param bin_name Character; Name of column to be created that contains bin data
 #' @param num_bins Vector; Provide a vector of length 2, where the first number
 #'   is the number of bins below the threshold (inclusive), and the second
@@ -91,40 +88,22 @@ bin_binary <- function(data,
 #' df2 <- bin_color_continuous(df, by = "rel", metric = "reliability")}
 bin_color_continuous <- function(data,
                                  by,
-                                 ascending = T,
-                                 metric = NULL,
-                                 bin_name = "bins",
+                                 range,
+                                 midpoint,
+                                 ascending = TRUE,
                                  num_bins = NULL,
-                                 midpoint = NULL,
-                                 range = NULL,
-                                 scale = NULL){
+                                 scale = NULL,
+                                 bin_name = "bins"){
   stopifnot(is.character(by),
             is.character(bin_name),
-            !is.null(metric),
             length(num_bins) < 3)
 
-  if (is.null(range)) {
-    metric_min <- min(data[by])
-    metric_max <- max(data[by])
-  }
-  else {
-    metric_min <- range[1]
-    metric_max <- range[2]
-  }
-
-  if (is.null(midpoint)) {
-    mid <- round( (metric_min + metric_max) / 2)
-  }
-  else {
-    mid <- midpoint
-  }
-
   # create color scale
-  lower_bins <- round(seq(metric_min, mid, length.out = 5)) # 5 bins.
-  upper_bins <- round(seq(mid, metric_max, length.out = 4 + 2)) # 4 bins.
+  lower_bins <- round(seq(range[1], midpoint, length.out = 5)) # 5 bins.
+  upper_bins <- round(seq(midpoint, range[2], length.out = 4 + 2)) # 4 bins.
   if (!is.null(num_bins)) { # user defines num_bins
-    lower_bins <- round(seq(metric_min, mid, length.out = num_bins[1]))
-    upper_bins <- round(seq(mid, metric_max, length.out = num_bins[2] + 2))
+    lower_bins <- round(seq(range[1], midpoint, length.out = num_bins[1]))
+    upper_bins <- round(seq(midpoint, range[2], length.out = num_bins[2] + 2))
   }
   b <- c(lower_bins, upper_bins)
   b <- unique(b)
@@ -213,4 +192,15 @@ build_plot <- function(
       keyheight = 1.5,
       keywidth  = 1.5)) +
     ggplot2::labs(x = axis_labels$x, y = axis_labels$y)
+}
+
+#' Finds the min and max of the metric.
+#'
+#' @return vector containing (min_range, max_range)
+get_range <- function(data, metric) {
+  metric_min <- min(data[metric])
+  metric_max <- max(data[metric])
+
+  range <- c(metric_min, metric_max)
+  range
 }
