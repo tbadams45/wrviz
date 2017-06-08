@@ -25,9 +25,9 @@
 #'   scale?
 #' @param ascending logical; Do increasing values in the metric indicate
 #'   increasingly acceptable performance?
-#' @param metricCol character; the name of the column where the metric resides
+#' @param metric_col character; the name of the column where the metric resides
 #'   in \code{data}. This defaults to \code{metric}.
-#' @param numBins Only used if binary == FALSE. Either a single number, or a vector of length 2,
+#' @param num_bins Only used if binary == FALSE. Either a single number, or a vector of length 2,
 #'   where the first number is the number of bins below the threshold
 #'   (inclusive), and the second number is the number of bins above the
 #'   treshold. Each number counts the midpoint as its own bin, so really you're
@@ -36,7 +36,7 @@
 #'   scale diverges. If NULL, defaults to middle of metric range.
 #' @param range Only used if binary == FALSE. A vector of length two that
 #'   defines the max and min value of the scale.
-#' @param colorScale Provide a list representing a color scale. If binary ==
+#' @param color_scale Provide a list representing a color scale. If binary ==
 #'   TRUE, this list should be of length 2. Otherwise, the list should be length
 #'   4, in the format c(lowest, midpoint, one-bin-above-midpoint, highest).
 #' @return A ggplot2 object representing the heatmap.
@@ -44,10 +44,10 @@
 #' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 #' df$rel <- seq(40,100,length=63)
 #' climate_heatmap(df,"rel",80)
-#' climate_heatmap(df,"reliability", binary = FALSE, metricCol = "rel")
+#' climate_heatmap(df,"reliability", binary = FALSE, metric_col = "rel")
 #'
 #' #don't use these colors in an actual plot
-#' climate_heatmap(df,"rel", colorScale = c("green","orange"))
+#' climate_heatmap(df,"rel", color_scale = c("green","orange"))
 #'
 #' @importFrom magrittr "%>%"
 #' @export
@@ -56,40 +56,40 @@ climate_heatmap <- function(data,
   threshold = 90,
   binary = TRUE,
   ascending = TRUE,
-  metricCol = metric,
-  numBins = NULL,
+  metric_col = metric,
+  num_bins = NULL,
   midpoint = NULL,
   range = NULL,
-  colorScale = NULL){
+  color_scale = NULL){
   try({ #catch errors in input
     names <- names(data)
-    if (!(("temp" %in% names) & ("precip" %in% names))){
+    if (!( ("temp" %in% names) & ("precip" %in% names))){
       stop("named 'temp' and 'precip' columns are required ",
         "for wrviz::climate_heatmap")
     }
     stopifnot(is.character(metric),
       is.numeric(threshold),
       is.logical(binary),
-      is.character(metricCol))
+      is.character(metric_col))
   })
 
   if (binary == TRUE){
     x   <- bin_binary(data,
-      by = metricCol,
+      by = metric_col,
       threshold = threshold,
       reverse = !ascending,
-      scale = colorScale)
+      scale = color_scale)
     data <- x$data
     colors <- x$colors
   } else { # continuous
     x      <- bin_color_continuous(data,
-      by = metricCol,
+      by = metric_col,
       ascending = ascending,
       metric = metric,
-      numBins = numBins,
+      num_bins = num_bins,
       midpoint = midpoint,
       range = range,
-      scale = colorScale)
+      scale = color_scale)
     data   <- x$data
     colors <- x$colors
   }
@@ -104,7 +104,7 @@ climate_heatmap <- function(data,
 
   tick   <- list(x = seq(min(data$temp), max(data$temp), t),
     y = seq(min(data$precip), max(data$precip), p))
-  label  <- list(x = expression("Temperature change (" * degree * C *")"),
+  label  <- list(x = expression("Temperature change (" * degree * C * ")"),
     y = paste("Precipitation change (%)"))
 
   ggplot2::ggplot(data, ggplot2::aes(x = temp, y = precip)) +

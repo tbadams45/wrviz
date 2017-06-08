@@ -19,15 +19,14 @@ bin_binary <- function(data,
                        by,
                        threshold,
                        levels = c("Acceptable", "Not Acceptable"),
-                       reverse = FALSE,
-                       scale = NULL){
+                       reverse = FALSE){
 
   stopifnot(is.character(by), length(levels) == 2, is.logical(reverse))
 
-  if(is.null(threshold)) {
-    metricMin <- min(data[by])
-    metricMax <- max(data[by])
-    threshold <- round((metricMin + metricMax) / 2)
+  if (is.null(threshold)) {
+    metric_min <- min(data[by])
+    metric_max <- max(data[by])
+    threshold <- round( (metric_min + metric_max) / 2)
   }
 
   # this final working solution using lazyeval was found on
@@ -54,14 +53,7 @@ bin_binary <- function(data,
   data <- data %>%
     dplyr::mutate(bins = factor(bins, levels = levels, labels = levels))
 
-  if(is.null(scale)){
-    colors <- c("#2E2ECC", "#CC2E2E") # from http://colorbrewer2.org/#type=diverging&scheme=RdBu&n=3
-    # colors <- c("royalblue4", "firebrick2")
-  } else {
-    colors <- scale
-  }
-
-  return(list(data = data, colors = colors))
+  return(data)
 }
 
 #' Bin data and get corresponding colors.
@@ -78,8 +70,8 @@ bin_binary <- function(data,
 #' @param ascending logical; do increasing values indicate a positive trend?
 #' @param metric character; The name of the metric we want to create a color
 #'   scale for.
-#' @param binName Character; Name of column to be created that contains bin data
-#' @param numBins Vector; Provide a vector of length 2, where the first number
+#' @param bin_name Character; Name of column to be created that contains bin data
+#' @param num_bins Vector; Provide a vector of length 2, where the first number
 #'   is the number of bins below the threshold (inclusive), and the second
 #'   number is the number of bins above the treshold.
 #' @param midpoint Sets the value where the color scale diverges. If NULL,
@@ -101,55 +93,55 @@ bin_color_continuous <- function(data,
                                  by,
                                  ascending = T,
                                  metric = NULL,
-                                 binName = "bins",
-                                 numBins = NULL,
+                                 bin_name = "bins",
+                                 num_bins = NULL,
                                  midpoint = NULL,
                                  range = NULL,
                                  scale = NULL){
   stopifnot(is.character(by),
-            is.character(binName),
+            is.character(bin_name),
             !is.null(metric),
-            length(numBins) < 3)
+            length(num_bins) < 3)
 
-  if(is.null(range)) {
-    metricMin <- min(data[by])
-    metricMax <- max(data[by])
+  if (is.null(range)) {
+    metric_min <- min(data[by])
+    metric_max <- max(data[by])
   }
   else {
-    metricMin <- range[1]
-    metricMax <- range[2]
+    metric_min <- range[1]
+    metric_max <- range[2]
   }
 
-  if(is.null(midpoint)) {
-    mid <- round((metricMin + metricMax) / 2)
+  if (is.null(midpoint)) {
+    mid <- round( (metric_min + metric_max) / 2)
   }
   else {
     mid <- midpoint
   }
 
   # create color scale
-  lowerBins <- round(seq(metricMin, mid, length.out = 5)) # 5 bins.
-  upperBins <- round(seq(mid, metricMax, length.out = 4+2)) # 4 bins.
-  if (!is.null(numBins)) { # user defines numBins
-    lowerBins <- round(seq(metricMin, mid, length.out = numBins[1]))
-    upperBins <- round(seq(mid, metricMax, length.out = numBins[2]+2))
+  lower_bins <- round(seq(metric_min, mid, length.out = 5)) # 5 bins.
+  upper_bins <- round(seq(mid, metric_max, length.out = 4 + 2)) # 4 bins.
+  if (!is.null(num_bins)) { # user defines num_bins
+    lower_bins <- round(seq(metric_min, mid, length.out = num_bins[1]))
+    upper_bins <- round(seq(mid, metric_max, length.out = num_bins[2] + 2))
   }
-  b <- c(lowerBins, upperBins)
+  b <- c(lower_bins, upper_bins)
   b <- unique(b)
 
   if (!is.null(scale)){ # user defines color scale
-    col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lowerBins))
-    col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upperBins))
+    col1 <- colorRampPalette(c(scale[[1]], scale[[2]]))(length(lower_bins))
+    col2 <- colorRampPalette(c(scale[[3]], scale[[4]]))(length(upper_bins))
   } else { # best guess
-    col1 <- colorRampPalette(c("firebrick2", "white"))(length(lowerBins))
-    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upperBins))
+    col1 <- colorRampPalette(c("firebrick2", "white"))(length(lower_bins))
+    col2 <- colorRampPalette(c("lightsteelblue1", "royalblue4"))(length(upper_bins))
   }
   colors  <- c(col1, col2)
 
   dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
                  x = as.name(by)))
   df <- data %>%
-    dplyr::mutate_(.dots = setNames(dots, c(binName)))
+    dplyr::mutate_(.dots = setNames(dots, c(bin_name)))
 
 
   list(data = df, colors = colors)
@@ -173,50 +165,19 @@ bin_color_continuous <- function(data,
 #' to_percent_change(seq(-0.3,0.7,by=0.1),baseline=0)
 #' to_percent_change(seq(0.512,1.512,by=0.1)) # answer is rounded}
 to_percent_change <- function(decimal_list, baseline = 1){
-  sapply(decimal_list, function(x) round((x - baseline) * 100))
+  sapply(decimal_list, function(x) round( (x - baseline) * 100))
 }
 
-
-#' Get bins for metrics.
+#' Build plot with defaults
 #'
-#' Generates a sequence to be used for binning, for a number of different water
-#' resources metrics.
-#'
-#' Currently supported metrics: reliability, safeyield.
-#'
-#' @param metric character; The name of the metric.
-#' @return A list containing two sequences. These should be concatenated before
-#'   binning, but are provided separately in order to enable more advanced color
-#'   scales.
-get_bins <- function(metric){
-
-  if (metric == "reliability"){
-    s1 <- c(seq(40, 90, 10), 95)
-    s2 <- seq(96, 100, 1)
-  }
-  else if (metric == "safeyield"){
-    s1 <- seq(30, 80, 10)
-    s2 <- seq(90, 130, 10)
-  }
-  else if (metric == "resilience") { # values range from 0 to 1
-    s1 <- c(seq(0, 0.60, 0.10))
-    s2 <- c(seq(0.70, 1, 0.05))
-  }
-  else if (metric == "vulnerability") { # values range from 0 to 1
-    s1 <- c(seq(0, 0.60, 0.10))
-    s2 <- c(seq(0.70,1,0.05))
-  } else {
-    stop("Please enter a valid metric.")
-  }
-  list(s1,s2)
-}
-
-#' Build plot with defaults for
+#' @param data data frame with at least four columns: "temp", "precip", your output column, and a "bins" column which indicates which bin the observation falls into.
+#' @param colors vector containing your color scale
+#' @param to_percent vector of length two: do you want your (temp, precip) data to be interpreted as percentage changes around 1? (e.g 0.9 is -10% change, 1.2 is 20% change)
+#' @return ggplot2 plot
 build_plot <- function(
   data,
   colors,
-  to_percent_y = TRUE,
-  to_percent_x = FALSE) {
+  to_percent = c(FALSE, TRUE)) {
   # dynamically determine tick marks
   t <- unique(data$temp) # remove elements that do not represent 'steps'
   t <- abs(t[2] - t[1]) # find length of one step
@@ -226,31 +187,30 @@ build_plot <- function(
   tick   <- list(x = seq(min(data$temp), max(data$temp), t),
     y = seq(min(data$precip), max(data$precip), p))
 
-  if(to_percent_x) {
-    xTickLabel <- to_percent_change(tick$x)
+  if (to_percent[1]) {
+    x_tick_label <- to_percent_change(tick$x)
   }
-  else xTickLabel <- tick$x
+  else x_tick_label <- tick$x
 
-  if(to_percent_y) {
-    yTickLabel <- to_percent_change(tick$y)
+  if (to_percent[2]) {
+    y_tick_label <- to_percent_change(tick$y)
   }
-  else yTickLabel <- tick$y
+  else y_tick_label <- tick$y
 
-  axisLabels  <- list(x = expression("Temperature change (" * degree * C *")"),
+  axis_labels  <- list(x = expression("Temperature change (" * degree * C * ")"),
     y = paste("Precipitation change (%)"))
-
 
   ggplot2::ggplot(data, ggplot2::aes(x = temp, y = precip)) +
     ggplot2::geom_tile(ggplot2::aes(fill = bins), color = "gray60") +
     ggplot2::scale_x_continuous(expand = c(0, 0),
       breaks = tick$x,
-      labels = xTickLabel) +
+      labels = x_tick_label) +
     ggplot2::scale_y_continuous(expand = c(0, 0),
       breaks = tick$y,
-      labels = yTickLabel) +
+      labels = y_tick_label) +
     ggplot2::scale_fill_manual(name = "Range", values = colors, drop = FALSE) +
     ggplot2::guides(fill = ggplot2::guide_legend(order = 2,
       keyheight = 1.5,
       keywidth  = 1.5)) +
-    ggplot2::labs(x = axisLabels$x, y = axisLabels$y)
+    ggplot2::labs(x = axis_labels$x, y = axis_labels$y)
 }

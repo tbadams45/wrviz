@@ -5,7 +5,7 @@
 \title{Bin data in a binary fashion.}
 \usage{
 bin_binary(data, by, threshold, levels = c("Acceptable", "Not Acceptable"),
-  reverse = FALSE, scale = NULL)
+  reverse = FALSE)
 }
 \arguments{
 \item{data}{The dataframe or related data structure containing the data.}

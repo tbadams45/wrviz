@@ -5,7 +5,7 @@
 \title{Bin data and get corresponding colors.}
 \usage{
 bin_color_continuous(data, by, ascending = T, metric = NULL,
-  binName = "bins", numBins = NULL, midpoint = NULL, range = NULL,
+  bin_name = "bins", num_bins = NULL, midpoint = NULL, range = NULL,
   scale = NULL)
 }
 \arguments{
@@ -18,9 +18,9 @@ bin_color_continuous(data, by, ascending = T, metric = NULL,
 \item{metric}{character; The name of the metric we want to create a color
 scale for.}
 
-\item{binName}{Character; Name of column to be created that contains bin data}
+\item{bin_name}{Character; Name of column to be created that contains bin data}
 
-\item{numBins}{Vector; Provide a vector of length 2, where the first number
+\item{num_bins}{Vector; Provide a vector of length 2, where the first number
 is the number of bins below the threshold (inclusive), and the second
 number is the number of bins above the treshold.}
 

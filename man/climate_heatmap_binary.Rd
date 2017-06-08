@@ -4,8 +4,8 @@
 \alias{climate_heatmap_binary}
 \title{Create a binary climate heatmap.}
 \usage{
-climate_heatmap_binary(data, metric, threshold = 90, ascending = TRUE,
-  metricCol = metric, colorScale = NULL)
+climate_heatmap_binary(data, metric, threshold = NULL, ascending = TRUE,
+  color_scale = NULL, metric_col = metric, to_percent = c(FALSE, TRUE))
 }
 \arguments{
 \item{data}{The data. Could be dataframe, data table, named matrix, etc.}
@@ -13,16 +13,20 @@ climate_heatmap_binary(data, metric, threshold = 90, ascending = TRUE,
 \item{metric}{character; The metric to display in the z axis. There should be
 a corresponding column name.}
 
-\item{threshold}{numeric; Determines when
-performance changes from acceptable to unacceptable.}
+\item{threshold}{numeric; Determines when performance changes from acceptable
+to unacceptable.}
 
 \item{ascending}{logical; Do increasing values in the metric indicate
 increasingly acceptable performance?}
 
-\item{metricCol}{character; the name of the column where the metric resides
+\item{color_scale}{Provide a vector of length 2 representing a color scale.}
+
+\item{metric_col}{character; the name of the column where the metric resides
 in \code{data}. This defaults to \code{metric}.}
 
-\item{colorScale}{Provide a vector of length 2 representing a color scale.}
+\item{to_percent}{list; List of length two that says whether or not (temp,
+precip) data should be treated as percent changes (e.g. 1 means 0% change,
+0.9 means -10% change, 1.2 means 20% change...)}
 }
 \value{
 A ggplot2 object representing the heatmap.
@@ -45,6 +49,6 @@ df$rel <- seq(40,100,length=63)
 climate_heatmap_binary(df,"rel",80)
 
 #don't use these colors in an actual plot
-climate_heatmap_binary(df,"rel", colorScale = c("green","orange"))
+climate_heatmap_binary(df,"rel", color_scale = c("green","orange"))
 
 }

@@ -5,8 +5,8 @@
 \title{Create a climate heatmap.}
 \usage{
 climate_heatmap(data, metric, threshold = 90, binary = TRUE,
-  ascending = TRUE, metricCol = metric, numBins = NULL, midpoint = NULL,
-  range = NULL, colorScale = NULL)
+  ascending = TRUE, metric_col = metric, num_bins = NULL,
+  midpoint = NULL, range = NULL, color_scale = NULL)
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
@@ -23,10 +23,10 @@ scale?}
 \item{ascending}{logical; Do increasing values in the metric indicate
 increasingly acceptable performance?}
 
-\item{metricCol}{character; the name of the column where the metric resides
+\item{metric_col}{character; the name of the column where the metric resides
 in \code{data}. This defaults to \code{metric}.}
 
-\item{numBins}{Only used if binary == FALSE. Either a single number, or a vector of length 2,
+\item{num_bins}{Only used if binary == FALSE. Either a single number, or a vector of length 2,
 where the first number is the number of bins below the threshold
 (inclusive), and the second number is the number of bins above the
 treshold. Each number counts the midpoint as its own bin, so really you're
@@ -38,7 +38,7 @@ scale diverges. If NULL, defaults to middle of metric range.}
 \item{range}{Only used if binary == FALSE. A vector of length two that
 defines the max and min value of the scale.}
 
-\item{colorScale}{Provide a list representing a color scale. If binary ==
+\item{color_scale}{Provide a list representing a color scale. If binary ==
 TRUE, this list should be of length 2. Otherwise, the list should be length
 4, in the format c(lowest, midpoint, one-bin-above-midpoint, highest).}
 }
@@ -67,9 +67,9 @@ settings defined here.
 df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 df$rel <- seq(40,100,length=63)
 climate_heatmap(df,"rel",80)
-climate_heatmap(df,"reliability", binary = FALSE, metricCol = "rel")
+climate_heatmap(df,"reliability", binary = FALSE, metric_col = "rel")
 
 #don't use these colors in an actual plot
-climate_heatmap(df,"rel", colorScale = c("green","orange"))
+climate_heatmap(df,"rel", color_scale = c("green","orange"))
 
 }

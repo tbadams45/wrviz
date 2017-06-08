@@ -2,10 +2,20 @@
 % Please edit documentation in R/utility_functions.R
 \name{build_plot}
 \alias{build_plot}
-\title{Build plot with defaults for}
+\title{Build plot with defaults}
 \usage{
-build_plot(data, colors, to_percent_y = TRUE, to_percent_x = FALSE)
+build_plot(data, colors, to_percent = c(FALSE, TRUE))
+}
+\arguments{
+\item{data}{data frame with at least four columns: "temp", "precip", your output column, and a "bins" column which indicates which bin the observation falls into.}
+
+\item{colors}{vector containing your color scale}
+
+\item{to_percent}{vector of length two: do you want your (temp, precip) data to be interpreted as percentage changes around 1? (e.g 0.9 is -10% change, 1.2 is 20% change)}
+}
+\value{
+ggplot2 plot
 }
 \description{
-Build plot with defaults for
+Build plot with defaults
 }
