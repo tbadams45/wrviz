@@ -4,9 +4,8 @@
 \alias{climate_heatmap_continuous}
 \title{Create a climate heatmap.}
 \usage{
-climate_heatmap_continuous(data, metric, ascending = TRUE,
-  metric_col = metric, num_bins = NULL, midpoint = NULL, range = NULL,
-  color_scale = NULL, to_percent = c(FALSE, TRUE))
+climate_heatmap_continuous(data, metric, bins = 7, ascending = TRUE,
+  range = NULL, colors = NULL, to_percent = c(FALSE, TRUE))
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
@@ -14,26 +13,16 @@ climate_heatmap_continuous(data, metric, ascending = TRUE,
 \item{metric}{character; The metric to display in the z axis. There should be
 a corresponding column name.}
 
+\item{bins}{Either a single number indicating the number of bins, or a vector
+that specifies where the bins will be cut.}
+
 \item{ascending}{logical; Do increasing values in the metric indicate
 increasingly acceptable performance?}
-
-\item{metric_col}{character; the name of the column where the metric resides
-in \code{data}. This defaults to \code{metric}.}
-
-\item{num_bins}{Either a single number, or a vector of length 2, where the
-first number is the number of bins below the threshold (inclusive), and the
-second number is the number of bins above the treshold. Each number counts
-the midpoint as its own bin, so really you're going to have one less bin
-than the sum of numbers you put here.}
-
-\item{midpoint}{Sets the value where the color scale diverges. If NULL,
-defaults to middle of metric range.}
 
 \item{range}{A vector of length two that defines the max and min value of the
 scale.}
 
-\item{color_scale}{Provide a list representing a color scale. Sould be length
-4, in the format c(lowest, midpoint, one-bin-above-midpoint, highest).}
+\item{colors}{Provide a list representing a color scale.}
 }
 \value{
 A ggplot2 object representing the heatmap.
@@ -53,6 +42,6 @@ settings defined here.
 \examples{
 df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 df$rel <- seq(40,100,length=63)
-climate_heatmap_continuous(df,"reliability", metric_col = "rel")
+climate_heatmap_continuous(df,"reliability")
 
 }

@@ -4,19 +4,21 @@
 \alias{bin_color_continuous}
 \title{Bin data and get corresponding colors.}
 \usage{
-bin_color_continuous(data, by, ascending = T, metric = NULL,
-  bin_name = "bins", num_bins = NULL, midpoint = NULL, range = NULL,
-  scale = NULL)
+bin_color_continuous(data, by, range, bins, scale = NULL, ascending = TRUE,
+  bin_name = "bins")
 }
 \arguments{
 \item{data}{The data to bin. Generally a data table.}
 
-\item{by}{Character; The name of the column to bin by.}
+\item{by}{Character; The name of of our output column that we are binning.}
+
+\item{range}{A vector of length two that defines the max and min value of the
+scale.}
+
+\item{scale}{List; should be length 4, in the format c(lowest, midpoint (white),
+one-bin-above-midpoint, highest).}
 
 \item{ascending}{logical; do increasing values indicate a positive trend?}
-
-\item{metric}{character; The name of the metric we want to create a color
-scale for.}
 
 \item{bin_name}{Character; Name of column to be created that contains bin data}
 
@@ -26,14 +28,6 @@ number is the number of bins above the treshold.}
 
 \item{midpoint}{Sets the value where the color scale diverges. If NULL,
 defaults to middle of metric range.}
-
-\item{range}{A vector of length two that defines the max and min value of the
-scale.}
-
-\item{scale}{List; should be length 4, in the format c(lowest, midpoint (white),
-one-bin-above-midpoint, highest).}
-
-\item{bins}{A list that defines the bins you would like to create.}
 }
 \value{
 a list \code{x}. \code{x$data} returns the data frame with a new
