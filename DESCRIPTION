@@ -1,7 +1,7 @@
 Package: wrviz
 Type: Package
 Title: Create Vizualizations For Water Resources
-Version: 0.1.8
+Version: 0.2.0
 Authors@R: person("Timothy", "Adams", email = "tbadams45@gmail.com",
     role = c("aut", "cre"))
 Description: wrviz is a visualization package that provides several types of
@@ -12,6 +12,8 @@ Description: wrviz is a visualization package that provides several types of
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
+    shiny    (>= 1.0.3),
+    miniUI   (>= 0.1.1),
     ggplot2  (>= 2.1.0),
     dplyr    (>= 0.5.0),
     lazyeval (>= 0.2.0),
@@ -19,7 +21,8 @@ Imports:
     RColorBrewer (>= 1.1-2),
     rstudioapi (>= 0.5),
     shinyBS (>= 0.61),
-    tidyr (>= 0.6.3)
+    tidyr (>= 0.6.3),
+    utils (>= 3.4.0)
 Depends:
     R (>= 3.3.1)
 RoxygenNote: 6.0.1

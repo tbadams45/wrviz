@@ -1,136 +1,3 @@
-#' Bin data in a binary fashion.
-#'
-#' Adds a "bin" column to a dataframe or related data strucutre which indicates
-#' whether or not another column meets a given threshold.
-#'
-#' @param data The dataframe or related data structure containing the data.
-#' @param by The column that we will evaluate against the threshold. Pass as
-#'   string.
-#' @param threshold The value we evaluate our "by" column with.
-#' @param levels The values that will be used to fill the "bin" column.
-#' @param reverse logical; Should values below or equal to the threshold be considered
-#'   good?
-#' @param scale A list (of length 2) of custom colors to use for the plot. First
-#'   element is for values that meet threshold, last element for those that fail
-#'   to meet the threshold.
-#' @return The same dataframe, but with our additional column indicating the
-#'   bins our data falls into.
-bin_binary <- function(data,
-                       by,
-                       threshold,
-                       levels = c("Acceptable", "Not Acceptable"),
-                       reverse = FALSE){
-
-  stopifnot(is.character(by), length(levels) == 2, is.logical(reverse))
-
-  if (is.null(threshold)) {
-    metric_min <- min(data[by])
-    metric_max <- max(data[by])
-    threshold <- round( (metric_min + metric_max) / 2)
-  }
-
-  # this final working solution using lazyeval was found on
-  # http://www.r-bloggers.com/using-mutate-from-dplyr-inside-a-function-getting-around-non-standard-evaluation/
-  # Potentially helpful vignettes at
-  # https://cran.r-project.org/web/packages/lazyeval/vignettes/lazyeval.html#fnref1
-  # and https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html
-  if (reverse == FALSE){
-    mutate_call <- lazyeval::interp(~ b >= t,
-                                   b = as.name(by),
-                                   t = threshold)
-  } else {
-    mutate_call <- lazyeval::interp(~ b <= t,
-                                   b = as.name(by),
-                                   t = threshold)
-  }
-
-  # default new col name to "bins" since I don't know how to call data$col_name
-  # on user-given col name
-  data <- data %>%
-    dplyr::mutate_(.dots = setNames(list(mutate_call), c("bins")))
-  data$bins[data$bins == TRUE]  <- levels[1]
-  data$bins[data$bins == FALSE] <- levels[2]
-  data <- data %>%
-    dplyr::mutate(bins = factor(bins, levels = levels, labels = levels))
-
-  return(data)
-}
-
-#' Bin data and get corresponding colors.
-#'
-#' Bins data for according to a given list.
-#'
-#' Currently provides scales and colors for reliability, safeyield, resilience,
-#' and vulnerability. To access, use \code{metric="reliability"},
-#' \code{metric="safeyield"}, etc.
-#'
-#' @param data The data to bin. Generally a data table.
-#' @param by Character; The name of of our output column that we are binning.
-#' @param ascending logical; do increasing values indicate a positive trend?
-#' @param bin_name Character; Name of column to be created that contains bin data
-#' @param num_bins Vector; Provide a vector of length 2, where the first number
-#'   is the number of bins below the threshold (inclusive), and the second
-#'   number is the number of bins above the treshold.
-#' @param midpoint Sets the value where the color scale diverges. If NULL,
-#'   defaults to middle of metric range.
-#' @param range A vector of length two that defines the max and min value of the
-#'   scale.
-#' @param scale List; should be length 4, in the format c(lowest, midpoint (white),
-#'   one-bin-above-midpoint, highest).
-#' @return a list \code{x}. \code{x$data} returns the data frame with a new
-#'   column containing the bins, \code{x$colors} contains the corresponding
-#'   color scale.
-#' @importFrom grDevices "colorRampPalette"
-#' @importFrom stats "setNames"
-#' @examples
-#' \dontrun{df <- expand.grid(temp = 0:8, precip = seq(0.7, 1.3, by = 0.1))
-#' df$rel <- seq(40, 100, length=63)
-#' df2 <- bin_color_continuous(df, by = "rel", metric = "reliability")}
-bin_color_continuous <- function(data,
-                                 by,
-                                 range,
-                                 bins,
-                                 scale = NULL,
-                                 ascending = TRUE,
-                                 bin_name = "bins"){
-  stopifnot(is.character(by),
-            is.character(bin_name))
-
-  if (is.null(range)) {
-    range <- get_range(data, by)
-  }
-
-  if (length(bins) == 1) {
-    # they gave us the number of bins they want
-    b <- round(seq(floor(range[1]), ceiling(range[2]), length.out = bins+1))
-    if(is.null(scale)) {
-      colors <- RColorBrewer::brewer.pal(bins, "RdBu")
-    } else {
-      colors <- scale
-    }
-
-    if(ascending == FALSE) {
-      colors <- rev(colors)
-    }
-  } else {
-    # they gave us where they want the bins cut, and they gave us a color scale
-    b <- bins
-    if(is.null(scale)) {
-      colors <- RColorBrewer::brewer.pal(length(bins), "RdBu")
-    } else {
-      colors <- scale
-    }
-  }
-
-  dots <- list(lazyeval::interp(~cut(x, b, dig.lab = 5, include.lowest = TRUE),
-                 x = as.name(by)))
-  df <- data %>%
-    dplyr::mutate_(.dots = setNames(dots, c(bin_name)))
-
-
-  list(data = df, colors = colors)
-}
-
 #' Convert decimals difference to percent differences.
 #'
 #' Converts a list of decimal numbers (e.g. 0.7, 1.0, 1.3) to their
@@ -161,6 +28,7 @@ to_percent_change <- function(decimal_list, baseline = 1){
 #' @param to_percent vector of length two: do you want your (temp, precip) data
 #'   to be interpreted as percentage changes around 1? (e.g 0.9 is -10\%
 #'   change, 1.2 is 20\% change)
+#' @param z_axis_title Title of Z axis (represented by color).
 #' @return ggplot2 plot
 build_plot <- function(
   data,
@@ -206,6 +74,8 @@ build_plot <- function(
 
 #' Finds the min and max of the metric.
 #'
+#' @param data The dataframe containing your metric
+#' @param metric Character; the name of your metric
 #' @return vector containing (min_range, max_range)
 get_range <- function(data, metric) {
   metric_min <- min(data[metric])

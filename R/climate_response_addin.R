@@ -1,10 +1,17 @@
+#' Climate Response Gadget
+#'
+#' Used to easily create climate response surfaces. Can be used on the console,
+#' or via the addins toolbar.
+#'
+#' @return A list containing the plot (x$plot) and the data used to create it
+#'   (x$data)
 #' @export
 climateResponseAddin <- function() {
 
   ui <- miniUI::miniPage(
     miniUI::gadgetTitleBar("Climate Response Creator"),
     miniUI::miniTabstripPanel(
-      miniUI::miniTabPanel("Upload", icon = icon("upload"),
+      miniUI::miniTabPanel("Upload", icon = shiny::icon("upload"),
         miniUI::miniContentPanel(
           shiny::p("Upload a CSV. Temperature column should be called 'temp', and precipitation should be 'precip'. You can have any number of columns with output variables."),
           shiny::uiOutput('uploadCompleteNotification'),
@@ -33,23 +40,23 @@ climateResponseAddin <- function() {
         ) # close miniContentPanel
       ), # close miniTabPanel
 
-      miniUI::miniTabPanel("Edit", icon = icon("pencil"),
+      miniUI::miniTabPanel("Edit", icon = shiny::icon("pencil"),
         miniUI::miniContentPanel(
           shiny::fillRow(width = "100%", height = "65%", # plot
             shiny::plotOutput('plot', height = "400px")
           ),
           shiny::fillRow( # outputs
-            shiny::fillCol(width = "95%", tagList(
+            shiny::fillCol(width = "95%", shiny::tagList(
               shiny::uiOutput('outputColumnControls'),
               shiny::uiOutput('evalTypeOption'),
               shiny::uiOutput('ascendingOption'),
               shiny::uiOutput('formatAsPercentageControls')
             )),
-            shiny::fillCol(width = "95%", tagList(
+            shiny::fillCol(width = "95%", shiny::tagList(
               shiny::uiOutput('rangeControls'),
               shiny::uiOutput('evalTypeSpecificControls')
             )),
-            shiny::fillCol(width = "95%", tagList(
+            shiny::fillCol(width = "95%", shiny::tagList(
               shiny::uiOutput('titleControls')
             ))
           )
@@ -67,7 +74,7 @@ climateResponseAddin <- function() {
         return(NULL)
       }
 
-      csv <- read.csv(inFile$datapath, header = input$header,
+      csv <- utils::read.csv(inFile$datapath, header = input$header,
         sep = input$sep, quote = input$quote)
 
       shiny::updateCheckboxInput(session, 'fileOpt', value = FALSE)
@@ -131,7 +138,7 @@ climateResponseAddin <- function() {
       if(input$xAxisUnits == "%") {
         xLab <- paste(input$xAxisTitle, " (%)")
       } else {
-        xLab <- paste(input$xAxisTitle, " (°", input$xAxisUnits, ")", sep = '')
+        xLab <- paste(input$xAxisTitle, " (\u00B0", input$xAxisUnits, ")", sep = '')
       }
 
       yLab <- paste(input$yAxisTitle, " (", input$yAxisUnits, ")", sep = '')
@@ -141,11 +148,11 @@ climateResponseAddin <- function() {
         ggplot2::theme(text = ggplot2::element_text(size = input$textSize))
     })
 
-    output$plot <- renderPlot({
+    output$plot <- shiny::renderPlot({
       plot()
     })
 
-    output$uploadCompleteNotification <- renderUI({
+    output$uploadCompleteNotification <- shiny::renderUI({
       if(is.null(data())) {
         return(NULL)
       }
@@ -154,57 +161,57 @@ climateResponseAddin <- function() {
       )
     })
 
-    output$outputColumnControls <- renderUI({
+    output$outputColumnControls <- shiny::renderUI({
       if(is.null(data())) {
         return(NULL)
       }
       colNames <- colnames(data())
       colNames <- colNames[!colNames %in% c('temp', 'precip')] # remove temp and precip columns, so we only have output columns
-      selectInput('outputColumns', 'Display Variable', colNames)
+      shiny::selectInput('outputColumns', 'Display Variable', colNames)
     })
 
-    output$evalTypeOption <- renderUI({
+    output$evalTypeOption <- shiny::renderUI({
       if (is.null(data())) {
         return(NULL)
       }
-      radioButtons('isContinuousScale',
+      shiny::radioButtons('isContinuousScale',
         'Evaluation Type',
         c('Continuous' = TRUE, 'Binary' = FALSE),
         selected = TRUE,
         inline = TRUE)
     })
 
-    output$ascendingOption <- renderUI({
+    output$ascendingOption <- shiny::renderUI({
       if(is.null(data())) {
         return(NULL)
       }
-      checkboxInput('ascending', 'Ascending', value = TRUE)
+      shiny::checkboxInput('ascending', 'Ascending', value = TRUE)
     })
 
-    output$formatAsPercentageControls <- renderUI({
+    output$formatAsPercentageControls <- shiny::renderUI({
       if(is.null(data())) {
         return(NULL)
       }
-      tagList(
-        checkboxInput('toPercentX', "Format temp as percentage change", value = FALSE),
-        checkboxInput('toPercentY', "Format precip as percentage change", value = TRUE)
+      shiny::tagList(
+        shiny::checkboxInput('toPercentX', "Format temp as percentage change", value = FALSE),
+        shiny::checkboxInput('toPercentY', "Format precip as percentage change", value = TRUE)
       )
     })
 
-    output$rangeControls <- renderUI({
+    output$rangeControls <- shiny::renderUI({
       if(is.null(input$outputColumns) ||
           input$isContinuousScale == FALSE) {
         return(NULL)
       }
       selected <- data()[input$outputColumns]
 
-      tagList(
-        numericInput('rangeMin', 'Range Minimum', value = floor(min(selected))),
-        numericInput('rangeMax', 'Range Maximum', value = ceiling(max(selected)))
+      shiny::tagList(
+        shiny::numericInput('rangeMin', 'Range Minimum', value = floor(min(selected))),
+        shiny::numericInput('rangeMax', 'Range Maximum', value = ceiling(max(selected)))
       )
     })
 
-    output$evalTypeSpecificControls <- renderUI({
+    output$evalTypeSpecificControls <- shiny::renderUI({
       if(is.null(data()) ||
           is.null(input$rangeMin) ||
           is.null(input$rangeMax)) {
@@ -212,10 +219,10 @@ climateResponseAddin <- function() {
       }
 
       if (input$isContinuousScale == TRUE) {
-        tagList(
-          textInput('bins', 'Bins (either a number, OR a list. e.g, 20, 30, 40, 50 for bins [20,30], (30,40], (40,50])',
+        shiny::tagList(
+          shiny::textInput('bins', 'Bins (either a number, OR a list. e.g, 20, 30, 40, 50 for bins [20,30], (30,40], (40,50])',
             value = "7"),
-          textInput('colors', 'Custom colors (must equal number of bins)',
+          shiny::textInput('colors', 'Custom colors (must equal number of bins)',
             value = '',
             placeholder = "#EF8A62,#F7F7F7,#67A9CF")
         )
@@ -226,26 +233,27 @@ climateResponseAddin <- function() {
         rangeMin <- floor(min(selected))
         rangeMax <- ceiling(max(selected))
 
-        tagList(
-          sliderInput('threshold', 'Threshold', min = rangeMin, max = rangeMax,
+        shiny::tagList(
+          shiny::sliderInput('threshold', 'Threshold', min = rangeMin, max = rangeMax,
             value = (rangeMax + rangeMin) / 2, round = TRUE),
-          textInput('colors', 'Custom colors (e.g. #2E2ECC,#CC2E2E). Must have 2 colors',
-            value = '')
+          shiny::textInput('colors', 'Custom colors (must have 2)',
+            value = '',
+            placeholder = '#2E2ECC,#CC2E2E')
         )
       }
     })
 
-    output$titleControls <- renderUI({
+    output$titleControls <- shiny::renderUI({
       if(is.null(data())) {
         return(NULL)
       }
-      tagList(
-        textInput('xAxisTitle', 'X Axis Name', value = 'Temperature Change'),
-        selectInput('xAxisUnits', 'X Axis Units', choices = c("Fahrenheit" = "F", "Celsius" = "C", "%")),
-        textInput('yAxisTitle', 'Y Axis Name', value = 'Precipitaton Change'),
-        textInput('yAxisUnits', 'Y Axis Units', value = "%"),
-        numericInput('textSize', 'Text Size', value = 20, min = 6, max = 100),
-        textInput('zAxisTitle', 'Z Axis Title', value = "Range")
+      shiny::tagList(
+        shiny::textInput('xAxisTitle', 'X Axis Name', value = 'Temperature Change'),
+        shiny::selectInput('xAxisUnits', 'X Axis Units', choices = c("Fahrenheit" = "F", "Celsius" = "C", "%")),
+        shiny::textInput('yAxisTitle', 'Y Axis Name', value = 'Precipitaton Change'),
+        shiny::textInput('yAxisUnits', 'Y Axis Units', value = "%"),
+        shiny::numericInput('textSize', 'Text Size', value = 20, min = 6, max = 100),
+        shiny::textInput('zAxisTitle', 'Z Axis Title', value = "Range")
       )
     })
 

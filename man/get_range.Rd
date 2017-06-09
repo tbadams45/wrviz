@@ -6,6 +6,11 @@
 \usage{
 get_range(data, metric)
 }
+\arguments{
+\item{data}{The dataframe containing your metric}
+
+\item{metric}{Character; the name of your metric}
+}
 \value{
 vector containing (min_range, max_range)
 }

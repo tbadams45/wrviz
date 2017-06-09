@@ -3,6 +3,4 @@
 export(climateResponseAddin)
 export(climate_heatmap_binary)
 export(climate_heatmap_continuous)
-importFrom(grDevices,"colorRampPalette")
 importFrom(magrittr,"%>%")
-importFrom(stats,"setNames")

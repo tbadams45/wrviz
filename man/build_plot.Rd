@@ -17,6 +17,8 @@ observation falls into.}
 \item{to_percent}{vector of length two: do you want your (temp, precip) data
 to be interpreted as percentage changes around 1? (e.g 0.9 is -10\%
 change, 1.2 is 20\% change)}
+
+\item{z_axis_title}{Title of Z axis (represented by color).}
 }
 \value{
 ggplot2 plot

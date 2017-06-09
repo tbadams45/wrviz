@@ -28,6 +28,8 @@ in \code{data}. This defaults to \code{metric}.}
 \item{to_percent}{list; List of length two that says whether or not (temp,
 precip) data should be treated as percent changes (e.g. 1 means 0% change,
 0.9 means -10\% change, 1.2 means 20\% change...)}
+
+\item{z_axis_title}{Title of Z axis (represented by color)}
 }
 \value{
 A ggplot2 object representing the heatmap.
