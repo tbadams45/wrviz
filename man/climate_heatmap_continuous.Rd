@@ -5,7 +5,8 @@
 \title{Create a climate heatmap.}
 \usage{
 climate_heatmap_continuous(data, metric, bins = 7, ascending = TRUE,
-  range = NULL, colors = NULL, to_percent = c(FALSE, TRUE))
+  range = NULL, colors = NULL, to_percent = c(FALSE, TRUE),
+  z_axis_title = "Range")
 }
 \arguments{
 \item{data}{The data. dataframe, data table, named matrix, etc.}
@@ -23,6 +24,10 @@ increasingly acceptable performance?}
 scale.}
 
 \item{colors}{Provide a list representing a color scale.}
+
+\item{to_percent}{list; List of length two that says whether or not (temp,
+precip) data should be treated as percent changes (e.g. 1 means 0% change,
+0.9 means -10% change, 1.2 means 20% change...)}
 }
 \value{
 A ggplot2 object representing the heatmap.

@@ -4,7 +4,8 @@
 \alias{build_plot}
 \title{Build plot with defaults}
 \usage{
-build_plot(data, colors, to_percent = c(FALSE, TRUE))
+build_plot(data, colors, to_percent = c(FALSE, TRUE),
+  z_axis_title = "Range")
 }
 \arguments{
 \item{data}{data frame with at least four columns: "temp", "precip", your output column, and a "bins" column which indicates which bin the observation falls into.}

@@ -5,7 +5,8 @@
 \title{Create a binary climate heatmap.}
 \usage{
 climate_heatmap_binary(data, metric, threshold = NULL, ascending = TRUE,
-  color_scale = NULL, metric_col = metric, to_percent = c(FALSE, TRUE))
+  color_scale = NULL, metric_col = metric, to_percent = c(FALSE, TRUE),
+  z_axis_title = "Range")
 }
 \arguments{
 \item{data}{The data. Could be dataframe, data table, named matrix, etc.}
