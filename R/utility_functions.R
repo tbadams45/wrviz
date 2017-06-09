@@ -104,7 +104,7 @@ bin_color_continuous <- function(data,
     # they gave us the number of bins they want
     b <- round(seq(floor(range[1]), ceiling(range[2]), length.out = bins+1))
     if(is.null(scale)) {
-      colors <- brewer.pal(bins, "RdBu")
+      colors <- RColorBrewer::brewer.pal(bins, "RdBu")
     } else {
       colors <- scale
     }
@@ -116,7 +116,7 @@ bin_color_continuous <- function(data,
     # they gave us where they want the bins cut, and they gave us a color scale
     b <- bins
     if(is.null(scale)) {
-      colors <- brewer.pal(length(bins), "RdBu")
+      colors <- RColorBrewer::brewer.pal(length(bins), "RdBu")
     } else {
       colors <- scale
     }
