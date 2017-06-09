@@ -154,9 +154,13 @@ to_percent_change <- function(decimal_list, baseline = 1){
 
 #' Build plot with defaults
 #'
-#' @param data data frame with at least four columns: "temp", "precip", your output column, and a "bins" column which indicates which bin the observation falls into.
+#' @param data data frame with at least four columns: "temp", "precip", your
+#'   output column, and a "bins" column which indicates which bin the
+#'   observation falls into.
 #' @param colors vector containing your color scale
-#' @param to_percent vector of length two: do you want your (temp, precip) data to be interpreted as percentage changes around 1? (e.g 0.9 is -10% change, 1.2 is 20% change)
+#' @param to_percent vector of length two: do you want your (temp, precip) data
+#'   to be interpreted as percentage changes around 1? (e.g 0.9 is -10\%
+#'   change, 1.2 is 20\% change)
 #' @return ggplot2 plot
 build_plot <- function(
   data,

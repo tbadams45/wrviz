@@ -8,11 +8,15 @@ build_plot(data, colors, to_percent = c(FALSE, TRUE),
   z_axis_title = "Range")
 }
 \arguments{
-\item{data}{data frame with at least four columns: "temp", "precip", your output column, and a "bins" column which indicates which bin the observation falls into.}
+\item{data}{data frame with at least four columns: "temp", "precip", your
+output column, and a "bins" column which indicates which bin the
+observation falls into.}
 
 \item{colors}{vector containing your color scale}
 
-\item{to_percent}{vector of length two: do you want your (temp, precip) data to be interpreted as percentage changes around 1? (e.g 0.9 is -10% change, 1.2 is 20% change)}
+\item{to_percent}{vector of length two: do you want your (temp, precip) data
+to be interpreted as percentage changes around 1? (e.g 0.9 is -10\%
+change, 1.2 is 20\% change)}
 }
 \value{
 ggplot2 plot

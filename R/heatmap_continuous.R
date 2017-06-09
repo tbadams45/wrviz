@@ -22,12 +22,12 @@
 #' @param colors Provide a list representing a color scale.
 #' @param to_percent list; List of length two that says whether or not (temp,
 #'   precip) data should be treated as percent changes (e.g. 1 means 0% change,
-#'   0.9 means -10% change, 1.2 means 20% change...)
+#'   0.9 means -10\% change, 1.2 means 20\% change...)
 #' @return A ggplot2 object representing the heatmap.
 #' @examples
 #' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 #' df$rel <- seq(40,100,length=63)
-#' climate_heatmap_continuous(df,"reliability")
+#' climate_heatmap_continuous(df,"rel")
 #'
 #' @importFrom magrittr "%>%"
 #' @export
@@ -44,7 +44,7 @@ climate_heatmap_continuous <- function(data,
     names <- names(data)
     if (!( ("temp" %in% names) & ("precip" %in% names))){
       stop("named 'temp' and 'precip' columns are required ",
-        "for wrviz::climate_heatmap")
+        "for wrviz::climate_heatmap_continuous")
     }
     stopifnot(is.character(metric))
   })
