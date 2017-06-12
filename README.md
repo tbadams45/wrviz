@@ -14,7 +14,7 @@ df$reliability <- seq(40,100,length=63)
 climate_heatmap_continuous(df,"reliability") 
 ```
 
-![Continuous plot](inst/binary.png)
+![Continuous plot](inst/continuous.png)
 
 ```r 
 climate_heatmap_binary(df,"reliability") 
