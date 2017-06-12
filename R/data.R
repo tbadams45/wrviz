@@ -15,3 +15,8 @@
 #'
 #' @source Randomly generated
 "reliability"
+
+#' CMIP5 data for the Mwache river basin
+#'
+#' Provided to show how GCM data can be overlaid on top of a heatmap.
+"CMIP5"

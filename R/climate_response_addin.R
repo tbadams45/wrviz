@@ -3,8 +3,8 @@
 #' Used to easily create climate response surfaces. Can be used on the console,
 #' or via the addins toolbar.
 #'
-#' @return A list containing the plot (x$plot) and the data used to create it
-#'   (x$data)
+#' @return A list containing the plot (x$plot), and the data used to create it
+#'   (x$metrics and x$gcm)
 #' @export
 climateResponseAddin <- function() {
 
@@ -13,30 +13,65 @@ climateResponseAddin <- function() {
     miniUI::miniTabstripPanel(
       miniUI::miniTabPanel("Upload", icon = shiny::icon("upload"),
         miniUI::miniContentPanel(
-          shiny::p("Upload a CSV. Temperature column should be called 'temp', and precipitation should be 'precip'. You can have any number of columns with output variables."),
-          shiny::uiOutput('uploadCompleteNotification'),
-          shiny::fileInput('file', 'Choose file to upload',
-            accept = c(
-              'text/csv',
-              'text/comma-separated-values',
-              'text/tab-separated-values',
-              'text/plain',
-              '.csv',
-              '.tsv'
+          shiny::fillCol(flex = c(2, 10),
+            shiny::fillRow(height = "20%",
+              shiny::tagList(
+                shiny::p("Upload a CSV. Temperature column should be called 'temp', and precipitation should be 'precip'. You can have any number of columns with output variables."),
+                shiny::uiOutput('uploadCompleteNotification')
+              )
+            ),
+            shiny::fillRow(width = "95%",
+              shiny::tagList(
+                shiny::fileInput('dataFile', 'Upload temp, precip, metric data',
+                  accept = c(
+                    'text/csv',
+                    'text/comma-separated-values',
+                    'text/tab-separated-values',
+                    'text/plain',
+                    '.csv',
+                    '.tsv'
+                  )
+                ),
+                shiny::tags$hr(),
+                shiny::checkboxInput('dataHeader', 'Header', TRUE),
+                shiny::radioButtons('dataSep', 'Separator',
+                  c(Comma=',',
+                    Semicolon=';',
+                    Tab='\t'),
+                  ','),
+                shiny::radioButtons('dataQuote', 'Quote',
+                  c(None='',
+                    'Double Quote'='"',
+                    'Single Quote'="'"),
+                  '"')
+              ),
+
+              shiny::tagList(
+                shiny::fileInput('gcmFile', 'Upload GCM data',
+                  accept = c(
+                    'text/csv',
+                    'text/comma-separated-values',
+                    'text/tab-separated-values',
+                    'text/plain',
+                    '.csv',
+                    '.tsv'
+                  )
+                ),
+                shiny::tags$hr(),
+                shiny::checkboxInput('gcmHeader', 'Header', TRUE),
+                shiny::radioButtons('gcmSep', 'Separator',
+                  c(Comma=',',
+                    Semicolon=';',
+                    Tab='\t'),
+                  ','),
+                shiny::radioButtons('gcmQuote', 'Quote',
+                  c(None='',
+                    'Double Quote'='"',
+                    'Single Quote'="'"),
+                  '"')
+              )
             )
-          ),
-          shiny::tags$hr(),
-          shiny::checkboxInput('header', 'Header', TRUE),
-          shiny::radioButtons('sep', 'Separator',
-            c(Comma=',',
-              Semicolon=';',
-              Tab='\t'),
-            ','),
-          shiny::radioButtons('quote', 'Quote',
-            c(None='',
-              'Double Quote'='"',
-              'Single Quote'="'"),
-            '"')
+          )
         ) # close miniContentPanel
       ), # close miniTabPanel
 
@@ -49,6 +84,7 @@ climateResponseAddin <- function() {
             shiny::fillCol(width = "95%", shiny::tagList(
               shiny::uiOutput('outputColumnControls'),
               shiny::uiOutput('evalTypeOption'),
+              shiny::uiOutput('gcmOption'),
               shiny::uiOutput('ascendingOption'),
               shiny::uiOutput('formatAsPercentageControls')
             )),
@@ -66,19 +102,39 @@ climateResponseAddin <- function() {
   ) # close miniPage
 
   server <- function(input, output, session) {
+    # gcm_data <- parse_gcm("./inst/extdata/raw_cmip5.xlsx")
+    # gcm_data <- dplyr::mutate(gcm_data, precip = precip/100 + 1)
+    # print(gcm_data)
+
     data <- shiny::reactive({
 
-      inFile <- input$file
+      inFile <- input$dataFile
 
       if (is.null(inFile)) {
         return(NULL)
       }
 
-      csv <- utils::read.csv(inFile$datapath, header = input$header,
-        sep = input$sep, quote = input$quote)
+      csv <- utils::read.csv(inFile$datapath, header = input$dataHeader,
+        sep = input$dataSep, quote = input$dataQuote)
 
-      shiny::updateCheckboxInput(session, 'fileOpt', value = FALSE)
       csv
+    })
+
+    gcm_data <- shiny::reactive({
+      inFile <- input$gcmFile
+
+      if (is.null(inFile)) {
+        return(NULL)
+      }
+
+      print(inFile$name)
+      extension <- strsplit(inFile$name, '[.]')[[1]][2] # split on dot.
+      print(extension)
+      file.rename(inFile$datapath, paste(inFile$datapath, '.', extension, sep = ""))
+      print(paste(inFile$datapath, '.', extension, sep = ""))
+      parsed_data <- parse_gcm(paste(inFile$datapath, '.', extension, sep = ""))
+
+      parsed_data
     })
 
     plot <- shiny::reactive({
@@ -135,6 +191,16 @@ climateResponseAddin <- function() {
         )
       }
 
+      if(input$gcm) {
+        temp_plot <- temp_plot +
+          ggplot2::geom_point(
+            data = gcm_data(),
+            ggplot2::aes(x = temp, y = precip, shape = scenario),
+            size = 2,
+            stroke = 1.5) +
+          ggplot2::scale_shape_manual(name = "Scenarios", values =c(21,22,23,24))
+      }
+
       if(input$xAxisUnits == "%") {
         xLab <- paste(input$xAxisTitle, " (%)")
       } else {
@@ -143,9 +209,11 @@ climateResponseAddin <- function() {
 
       yLab <- paste(input$yAxisTitle, " (", input$yAxisUnits, ")", sep = '')
 
-      temp_plot +
+      temp_plot <- temp_plot +
         ggplot2::labs(x = xLab, y = yLab) +
         ggplot2::theme(text = ggplot2::element_text(size = input$textSize))
+
+      temp_plot
     })
 
     output$plot <- shiny::renderPlot({
@@ -157,7 +225,7 @@ climateResponseAddin <- function() {
         return(NULL)
       }
       shiny::tagList(
-        shiny::tags$p(shiny::tags$b("Your upload is complete! Go to the edit tab."))
+        shiny::tags$p(shiny::tags$b("Your upload is complete! Go to the edit tab to edit your plot. You can also upload your GCM data if you'd like."))
       )
     })
 
@@ -179,6 +247,13 @@ climateResponseAddin <- function() {
         c('Continuous' = TRUE, 'Binary' = FALSE),
         selected = TRUE,
         inline = TRUE)
+    })
+
+    output$gcmOption <- shiny::renderUI({
+      if (is.null(data())) {
+        return(NULL)
+      }
+      shiny::checkboxInput('gcm', "Show GCMs", value = FALSE)
     })
 
     output$ascendingOption <- shiny::renderUI({
@@ -258,7 +333,7 @@ climateResponseAddin <- function() {
     })
 
     shiny::observeEvent(input$done, {
-      val <- list(data = data(), plot = plot())
+      val <- list(metrics = data(), plot = plot(), gcm_output = gcm_data())
 
       shiny::stopApp(val)
     })
@@ -269,5 +344,4 @@ climateResponseAddin <- function() {
                    viewer = shiny::dialogViewer("Climate Reponse Explorer",
                                                 width = 800,
                                                 height = 1300))
-
 }

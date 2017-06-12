@@ -7,8 +7,8 @@
 climateResponseAddin()
 }
 \value{
-A list containing the plot (x$plot) and the data used to create it
-  (x$data)
+A list containing the plot (x$plot), and the data used to create it
+  (x$metrics and x$gcm)
 }
 \description{
 Used to easily create climate response surfaces. Can be used on the console,

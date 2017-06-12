@@ -3,4 +3,5 @@
 export(climateResponseAddin)
 export(climate_heatmap_binary)
 export(climate_heatmap_continuous)
+export(parse_gcm)
 importFrom(magrittr,"%>%")

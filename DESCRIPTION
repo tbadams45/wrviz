@@ -1,7 +1,7 @@
 Package: wrviz
 Type: Package
 Title: Create Vizualizations For Water Resources
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: person("Timothy", "Adams", email = "tbadams45@gmail.com",
     role = c("aut", "cre"))
 Description: wrviz is a visualization package that provides several types of
@@ -22,9 +22,11 @@ Imports:
     rstudioapi (>= 0.5),
     shinyBS (>= 0.61),
     tidyr (>= 0.6.3),
-    utils (>= 3.4.0)
+    utils (>= 3.4.0),
+    readxl (>= 1.0.0),
+    stats (>= 3.4.0)
 Depends:
-    R (>= 3.3.1)
+    R (>= 3.4.0)
 RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown
