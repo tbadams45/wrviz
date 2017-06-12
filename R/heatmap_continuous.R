@@ -29,6 +29,12 @@
 #' df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 #' df$rel <- seq(40,100,length=63)
 #' climate_heatmap_continuous(df,"rel")
+#' climate_heatmap_continuous(df,"rel", bins = 4)
+#' climate_heatmap_continuous(df,"rel", bins = c(20, 30, 50, 80, 100), range = c(20, 100))
+#'
+#' colors <- grDevices::colorRampPalette(c("firebrick2", "deepskyblue2"))(7)
+#' climate_heatmap_continuous(df, "rel", bins = 7, colors = colors) +
+#'   ggplot2::theme(text = ggplot2::element_text(size = 18))
 #'
 #' @importFrom magrittr "%>%"
 #' @export
@@ -41,7 +47,7 @@ climate_heatmap_continuous <- function(data,
   to_percent = c(FALSE, TRUE),
   z_axis_title = "Range") {
 
-  try({ #catch errors in input
+  try({
     names <- names(data)
     if (!( ("temp" %in% names) & ("precip" %in% names))){
       stop("named 'temp' and 'precip' columns are required ",
@@ -53,10 +59,6 @@ climate_heatmap_continuous <- function(data,
   if (is.null(range)) {
     range <- get_range(data, metric)
   }
-
-  # if (is.null(midpoint)) {
-  #   midpoint <- round( (range[1] + range[2]) / 2)
-  # }
 
   x <- bin_color_continuous(data,
     by = metric,
@@ -121,20 +123,22 @@ bin_color_continuous <- function(data,
 
   if (length(bins) == 1) {
     # they gave us the number of bins they want
-    b <- round(seq(floor(range[1]), ceiling(range[2]), length.out = bins+1))
-    if(is.null(scale)) {
+    b <- round(seq(floor(range[1]), ceiling(range[2]), length.out = bins + 1))
+
+    if (is.null(scale)) {
       colors <- RColorBrewer::brewer.pal(bins, "RdBu")
     } else {
       colors <- scale
     }
 
-    if(ascending == FALSE) {
+    if (ascending == FALSE) {
       colors <- rev(colors)
     }
+
   } else {
     # they gave us where they want the bins cut, and they gave us a color scale
     b <- bins
-    if(is.null(scale)) {
+    if (is.null(scale)) {
       colors <- RColorBrewer::brewer.pal(length(bins), "RdBu")
     } else {
       colors <- scale

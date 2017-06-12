@@ -50,5 +50,11 @@ settings defined here.
 df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 df$rel <- seq(40,100,length=63)
 climate_heatmap_continuous(df,"rel")
+climate_heatmap_continuous(df,"rel", bins = 4)
+climate_heatmap_continuous(df,"rel", bins = c(20, 30, 50, 80, 100), range = c(20, 100))
+
+colors <- grDevices::colorRampPalette(c("firebrick2", "deepskyblue2"))(7)
+climate_heatmap_continuous(df, "rel", bins = 7, colors = colors) +
+  ggplot2::theme(text = ggplot2::element_text(size = 18))
 
 }

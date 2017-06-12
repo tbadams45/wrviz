@@ -1,4 +1,4 @@
 Name: Climate Response Creator
 Description: Generates a ggplot2 climate response plot.
-Binding: climateResponseAddin
+Binding: climateResponseCreator
 Interactive: true

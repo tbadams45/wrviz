@@ -51,7 +51,7 @@ df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1))
 df$rel <- seq(40,100,length=63)
 climate_heatmap_binary(df,"rel",80)
 
-#don't use these colors in an actual plot
-climate_heatmap_binary(df,"rel", color_scale = c("green","orange"))
+climate_heatmap_binary(df,"rel", color_scale = c("firebrick2","deepskyblue2")) +
+ ggplot2::theme(text = ggplot2::element_text(size = 18))
 
 }

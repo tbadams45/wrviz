@@ -13,6 +13,7 @@
 #'   precip), which detail the gcm model, the scenario (e.g. RCP 2.6), the
 #'   temperature change in absolute units, and the preciptation change in
 #'   percentges (where 1 == 0\% change, and 0.9 == -10\% percentage change)
+#'
 #' @importFrom magrittr "%>%"
 #' @export
 parse_gcm <- function(excel_filepath) {
@@ -72,7 +73,6 @@ parse_gcm <- function(excel_filepath) {
 #' (e.g. "RCP 2.6").
 #'
 #' @param sheet_name string of sheet name
-#' @example parse_sheet_name("tas_rcp45")
 #'
 #' @return list(variable, scenario)
 parse_sheet_name <- function(sheet_name) {
@@ -102,4 +102,3 @@ parse_sheet_name <- function(sheet_name) {
 
   result
 }
-

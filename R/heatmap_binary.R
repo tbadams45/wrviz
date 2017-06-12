@@ -30,33 +30,33 @@
 #' df$rel <- seq(40,100,length=63)
 #' climate_heatmap_binary(df,"rel",80)
 #'
-#' #don't use these colors in an actual plot
-#' climate_heatmap_binary(df,"rel", color_scale = c("green","orange"))
+#' climate_heatmap_binary(df,"rel", color_scale = c("firebrick2","deepskyblue2")) +
+#'  ggplot2::theme(text = ggplot2::element_text(size = 18))
 #'
 #' @importFrom magrittr "%>%"
 #' @export
 climate_heatmap_binary <- function(data,
-                            metric,
-                            threshold = NULL,
-                            ascending = TRUE,
-                            color_scale = NULL,
-                            metric_col = metric,
-                            to_percent = c(FALSE, TRUE),
-                            z_axis_title = "Range"){
-  try({ #catch errors in input
+  metric,
+  threshold = NULL,
+  ascending = TRUE,
+  color_scale = NULL,
+  metric_col = metric,
+  to_percent = c(FALSE, TRUE),
+  z_axis_title = "Range"){
+  try({
     names <- names(data)
     if (!( ("temp" %in% names) & ("precip" %in% names))){
       stop("named 'temp' and 'precip' columns are required ",
-           "for wrviz::climate_heatmap")
+        "for wrviz::climate_heatmap")
     }
     stopifnot(is.character(metric),
-              is.character(metric_col))
+      is.character(metric_col))
   })
 
   data   <- bin_binary(data,
-                    by = metric_col,
-                    threshold = threshold,
-                    reverse = !ascending)
+    by = metric_col,
+    threshold = threshold,
+    reverse = !ascending)
 
   if (is.null(color_scale)) {
     colors <- c("#2E2ECC", "#CC2E2E") # from http://colorbrewer2.org/#type=diverging&scheme=RdBu&n=3

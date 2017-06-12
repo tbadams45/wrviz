@@ -6,172 +6,139 @@
 #' @return A list containing the plot (x$plot), and the data used to create it
 #'   (x$metrics and x$gcm)
 #' @export
-climateResponseAddin <- function() {
+climateResponseCreator <- function() {
 
   ui <- miniUI::miniPage(
     miniUI::gadgetTitleBar("Climate Response Creator"),
     miniUI::miniTabstripPanel(
       miniUI::miniTabPanel("Upload", icon = shiny::icon("upload"),
         miniUI::miniContentPanel(
-          shiny::fillCol(flex = c(2, 10),
-            shiny::fillRow(height = "20%",
-              shiny::tagList(
-                shiny::p("Upload a CSV. Temperature column should be called 'temp', and precipitation should be 'precip'. You can have any number of columns with output variables."),
-                shiny::uiOutput('uploadCompleteNotification')
-              )
-            ),
-            shiny::fillRow(width = "95%",
-              shiny::tagList(
-                shiny::fileInput('dataFile', 'Upload temp, precip, metric data',
+          shiny::fillCol(
+                shiny::tagList(
+                  shiny::p("Upload a CSV containing a temperature change column, precipitation change column, and however many output metric columns you'd like. Temperature and precipitation columns must be named \"temp\" and \"precip\", respectively. If you intend to overlay GMC data, then your temperature column should be in absolute units, and your precipitation should be in percentage change, where 1 == 0% change, 0.9 represents -10% change, 1.2 represents 20% change, etc."),
+                shiny::p("To include GCM data, upload the raw excel file output from Sungwook's GCM analysis tool. The file name will probably look something like", shiny::em("ProjectName_ClimatolChange_Hist(aaaa-bbbb)_RCP(cccc-dddd).xlsx"), "."),
+                shiny::p("When you're done, hit the done button (yes, really!), and your plot and the data used to build it will be stored in a list. Even if you didn't assign the output to a variable in the console, you can access it using R's built in .Last.value variable."),
+                shiny::uiOutput("upload_complete_notification"),
+                shiny::fileInput("data_file", "Upload temp, precip, metric data",
                   accept = c(
-                    'text/csv',
-                    'text/comma-separated-values',
-                    'text/tab-separated-values',
-                    'text/plain',
-                    '.csv',
-                    '.tsv'
+                    "text/csv",
+                    "text/comma-separated-values",
+                    "text/tab-separated-values",
+                    "text/plain",
+                    ".csv",
+                    ".tsv"
                   )
                 ),
-                shiny::tags$hr(),
-                shiny::checkboxInput('dataHeader', 'Header', TRUE),
-                shiny::radioButtons('dataSep', 'Separator',
-                  c(Comma=',',
-                    Semicolon=';',
-                    Tab='\t'),
-                  ','),
-                shiny::radioButtons('dataQuote', 'Quote',
-                  c(None='',
-                    'Double Quote'='"',
-                    'Single Quote'="'"),
-                  '"')
-              ),
-
-              shiny::tagList(
-                shiny::fileInput('gcmFile', 'Upload GCM data',
+                shiny::fileInput("gcm_file", "Upload GCM data",
                   accept = c(
-                    'text/csv',
-                    'text/comma-separated-values',
-                    'text/tab-separated-values',
-                    'text/plain',
-                    '.csv',
-                    '.tsv'
+                    "text/csv",
+                    "text/comma-separated-values",
+                    "text/tab-separated-values",
+                    "text/plain",
+                    ".csv",
+                    ".tsv",
+                    ".xlsx",
+                    ".xls"
                   )
-                ),
-                shiny::tags$hr(),
-                shiny::checkboxInput('gcmHeader', 'Header', TRUE),
-                shiny::radioButtons('gcmSep', 'Separator',
-                  c(Comma=',',
-                    Semicolon=';',
-                    Tab='\t'),
-                  ','),
-                shiny::radioButtons('gcmQuote', 'Quote',
-                  c(None='',
-                    'Double Quote'='"',
-                    'Single Quote'="'"),
-                  '"')
-              )
-            )
+                )
+                )
           )
         ) # close miniContentPanel
       ), # close miniTabPanel
 
       miniUI::miniTabPanel("Edit", icon = shiny::icon("pencil"),
         miniUI::miniContentPanel(
-          shiny::fillRow(width = "100%", height = "65%", # plot
-            shiny::plotOutput('plot', height = "400px")
-          ),
-          shiny::fillRow( # outputs
-            shiny::fillCol(width = "95%", shiny::tagList(
-              shiny::uiOutput('outputColumnControls'),
-              shiny::uiOutput('evalTypeOption'),
-              shiny::uiOutput('gcmOption'),
-              shiny::uiOutput('ascendingOption'),
-              shiny::uiOutput('formatAsPercentageControls')
-            )),
-            shiny::fillCol(width = "95%", shiny::tagList(
-              shiny::uiOutput('rangeControls'),
-              shiny::uiOutput('evalTypeSpecificControls')
-            )),
-            shiny::fillCol(width = "95%", shiny::tagList(
-              shiny::uiOutput('titleControls')
-            ))
-          )
+          shiny::fillCol(flex = c(2,3),
+            shiny::fillRow(width = "100%", height = "85%", # plot
+              shiny::plotOutput("plot", height = "300px")
+            ),
+
+            shiny::fillRow( # outputs
+              shiny::fillCol(width = "95%", shiny::tagList(
+                shiny::uiOutput("output_column_controls"),
+                shiny::uiOutput("eval_type_option"),
+                shiny::uiOutput("gcm_option"),
+                shiny::uiOutput("ascending_option"),
+                shiny::uiOutput("format_as_percentage_controls")
+              )),
+              shiny::fillCol(width = "95%", shiny::tagList(
+                shiny::uiOutput("range_controls"),
+                shiny::uiOutput("eval_type_specific_controls")
+              )),
+              shiny::fillCol(width = "95%", shiny::tagList(
+                shiny::uiOutput("title_controls")
+              ))
+            )
+            )
+
         ) # close miniContentPanel
       ) # close miniTabPanel
     ) # close miniTabstripPanel
   ) # close miniPage
 
   server <- function(input, output, session) {
-    # gcm_data <- parse_gcm("./inst/extdata/raw_cmip5.xlsx")
-    # gcm_data <- dplyr::mutate(gcm_data, precip = precip/100 + 1)
-    # print(gcm_data)
-
     data <- shiny::reactive({
 
-      inFile <- input$dataFile
+      in_file <- input$data_file
 
-      if (is.null(inFile)) {
+      if (is.null(in_file)) {
         return(NULL)
       }
 
-      csv <- utils::read.csv(inFile$datapath, header = input$dataHeader,
-        sep = input$dataSep, quote = input$dataQuote)
+      csv <- utils::read.csv(in_file$datapath, header = TRUE)
 
       csv
     })
 
     gcm_data <- shiny::reactive({
-      inFile <- input$gcmFile
+      in_file <- input$gcm_file
 
-      if (is.null(inFile)) {
+      if (is.null(in_file)) {
         return(NULL)
       }
 
-      print(inFile$name)
-      extension <- strsplit(inFile$name, '[.]')[[1]][2] # split on dot.
-      print(extension)
-      file.rename(inFile$datapath, paste(inFile$datapath, '.', extension, sep = ""))
-      print(paste(inFile$datapath, '.', extension, sep = ""))
-      parsed_data <- parse_gcm(paste(inFile$datapath, '.', extension, sep = ""))
+      extension <- strsplit(in_file$name, "[.]")[[1]][2] # split on dot.
+      file.rename(in_file$datapath, paste(in_file$datapath, ".", extension, sep = ""))
+      parsed_data <- parse_gcm(paste(in_file$datapath, ".", extension, sep = ""))
 
       parsed_data
     })
 
     plot <- shiny::reactive({
-      if (is.null(input$outputColumns) ||
-          is.null(input$isContinuousScale) ||
-          is.null(input$rangeMin) ||
+      if (is.null(input$output_columns) ||
+          is.null(input$is_continuous_scale) ||
+          is.null(input$range_min) ||
           is.null(input$ascending) ||
           is.null(input$bins) ||
-          is.null(input$toPercentX) ||
-          is.null(input$toPercentY) ||
-          is.null(input$rangeMax)) {
+          is.null(input$to_percent_x) ||
+          is.null(input$to_percent_y) ||
+          is.null(input$range_max)) {
         return(NULL)
       }
 
-      if(input$isContinuousScale == TRUE) {
-        bins <- as.numeric(unlist(strsplit(input$bins, split=",")))
+      if (input$is_continuous_scale == TRUE) {
+        bins <- as.numeric(unlist(strsplit(input$bins, split = ",")))
 
-        if(input$colors != ''){
-          colors <- unlist(strsplit(input$colors, split=","))
+        if (input$colors != ""){
+          colors <- unlist(strsplit(input$colors, split = ","))
         } else {
           colors <- NULL
         }
 
         temp_plot <- climate_heatmap_continuous(
           data(),
-          metric = input$outputColumns,
+          metric = input$output_columns,
           bins = bins,
           ascending = input$ascending,
-          range = c(input$rangeMin, input$rangeMax),
+          range = c(input$range_min, input$range_max),
           colors = colors,
-          to_percent = c(input$toPercentX, input$toPercentY),
-          z_axis_title = input$zAxisTitle
+          to_percent = c(input$to_percent_x, input$to_percent_y),
+          z_axis_title = input$z_axis_title
         )
 
       } else {
-        if(input$colors != ''){
-          colors <- unlist(strsplit(input$colors, split=","))
+        if (input$colors != ""){
+          colors <- unlist(strsplit(input$colors, split = ","))
         } else {
           colors <- NULL
         }
@@ -182,36 +149,38 @@ climateResponseAddin <- function() {
 
         temp_plot <- climate_heatmap_binary(
           data(),
-          metric = input$outputColumns,
+          metric = input$output_columns,
           threshold = as.numeric(input$threshold),
           ascending = input$ascending,
           color_scale = colors,
-          to_percent = c(input$toPercentX, input$toPercentY),
-          z_axis_title = input$zAxisTitle
+          to_percent = c(input$to_percent_x, input$to_percent_y),
+          z_axis_title = input$z_axis_title
         )
       }
 
-      if(input$gcm) {
+      if (input$gcm) {
         temp_plot <- temp_plot +
           ggplot2::geom_point(
             data = gcm_data(),
             ggplot2::aes(x = temp, y = precip, shape = scenario),
             size = 2,
             stroke = 1.5) +
-          ggplot2::scale_shape_manual(name = "Scenarios", values =c(21,22,23,24))
+          ggplot2::scale_shape_manual(name = "Scenarios",
+                                      values = c(21, 22, 23, 24))
       }
 
-      if(input$xAxisUnits == "%") {
-        xLab <- paste(input$xAxisTitle, " (%)")
+      if (input$x_axis_units == "%") {
+        x_lab <- paste(input$x_axis_title, " (%)")
       } else {
-        xLab <- paste(input$xAxisTitle, " (\u00B0", input$xAxisUnits, ")", sep = '')
+        x_lab <- paste(input$x_axis_title, " (\u00B0", input$x_axis_units, ")",
+                      sep = "")
       }
 
-      yLab <- paste(input$yAxisTitle, " (", input$yAxisUnits, ")", sep = '')
+      y_lab <- paste(input$y_axis_title, " (", input$y_axis_units, ")", sep = "")
 
       temp_plot <- temp_plot +
-        ggplot2::labs(x = xLab, y = yLab) +
-        ggplot2::theme(text = ggplot2::element_text(size = input$textSize))
+        ggplot2::labs(x = x_lab, y = y_lab) +
+        ggplot2::theme(text = ggplot2::element_text(size = input$text_size))
 
       temp_plot
     })
@@ -220,120 +189,129 @@ climateResponseAddin <- function() {
       plot()
     })
 
-    output$uploadCompleteNotification <- shiny::renderUI({
-      if(is.null(data())) {
-        return(NULL)
-      }
-      shiny::tagList(
-        shiny::tags$p(shiny::tags$b("Your upload is complete! Go to the edit tab to edit your plot. You can also upload your GCM data if you'd like."))
-      )
-    })
-
-    output$outputColumnControls <- shiny::renderUI({
-      if(is.null(data())) {
-        return(NULL)
-      }
-      colNames <- colnames(data())
-      colNames <- colNames[!colNames %in% c('temp', 'precip')] # remove temp and precip columns, so we only have output columns
-      shiny::selectInput('outputColumns', 'Display Variable', colNames)
-    })
-
-    output$evalTypeOption <- shiny::renderUI({
+    output$upload_complete_notification <- shiny::renderUI({
       if (is.null(data())) {
         return(NULL)
       }
-      shiny::radioButtons('isContinuousScale',
-        'Evaluation Type',
-        c('Continuous' = TRUE, 'Binary' = FALSE),
+      shiny::tagList(
+        shiny::tags$p(shiny::tags$b("Your upload is complete!
+          Go to the edit tab to edit your plot. You can also upload your GCM
+          data if you'd like."))
+      )
+    })
+
+    output$output_column_controls <- shiny::renderUI({
+      if (is.null(data())) {
+        return(NULL)
+      }
+      col_names <- colnames(data())
+      col_names <- col_names[!col_names %in% c("temp", "precip")] # remove temp and precip columns, so we only have output columns
+      shiny::selectInput("output_columns", "Display Variable", col_names)
+    })
+
+    output$eval_type_option <- shiny::renderUI({
+      if (is.null(data())) {
+        return(NULL)
+      }
+      shiny::radioButtons("is_continuous_scale",
+        "Evaluation Type",
+        c("Continuous" = TRUE, "Binary" = FALSE),
         selected = TRUE,
         inline = TRUE)
     })
 
-    output$gcmOption <- shiny::renderUI({
+    output$gcm_option <- shiny::renderUI({
       if (is.null(data())) {
         return(NULL)
       }
-      shiny::checkboxInput('gcm', "Show GCMs", value = FALSE)
+      shiny::checkboxInput("gcm", "Show GCMs", value = FALSE)
     })
 
-    output$ascendingOption <- shiny::renderUI({
-      if(is.null(data())) {
+    output$ascending_option <- shiny::renderUI({
+      if (is.null(data())) {
         return(NULL)
       }
-      shiny::checkboxInput('ascending', 'Ascending', value = TRUE)
+      shiny::checkboxInput("ascending", "Ascending", value = TRUE)
     })
 
-    output$formatAsPercentageControls <- shiny::renderUI({
-      if(is.null(data())) {
+    output$format_as_percentage_controls <- shiny::renderUI({
+      if (is.null(data())) {
         return(NULL)
       }
       shiny::tagList(
-        shiny::checkboxInput('toPercentX', "Format temp as percentage change", value = FALSE),
-        shiny::checkboxInput('toPercentY', "Format precip as percentage change", value = TRUE)
+        shiny::checkboxInput("to_percent_x",
+                             "Format temp as percentage change",
+                             value = FALSE),
+        shiny::checkboxInput("to_percent_y",
+                             "Format precip as percentage change",
+                             value = TRUE)
       )
     })
 
-    output$rangeControls <- shiny::renderUI({
-      if(is.null(input$outputColumns) ||
-          input$isContinuousScale == FALSE) {
+    output$range_controls <- shiny::renderUI({
+      if (is.null(input$output_columns) ||
+          input$is_continuous_scale == FALSE) {
         return(NULL)
       }
-      selected <- data()[input$outputColumns]
+      selected <- data()[input$output_columns]
 
       shiny::tagList(
-        shiny::numericInput('rangeMin', 'Range Minimum', value = floor(min(selected))),
-        shiny::numericInput('rangeMax', 'Range Maximum', value = ceiling(max(selected)))
+        shiny::numericInput("range_min", "Range Minimum", value = floor(min(selected))),
+        shiny::numericInput("range_max", "Range Maximum", value = ceiling(max(selected)))
       )
     })
 
-    output$evalTypeSpecificControls <- shiny::renderUI({
-      if(is.null(data()) ||
-          is.null(input$rangeMin) ||
-          is.null(input$rangeMax)) {
+    output$eval_type_specific_controls <- shiny::renderUI({
+      if (is.null(data()) ||
+          is.null(input$range_min) ||
+          is.null(input$range_max)) {
         return(NULL)
       }
 
-      if (input$isContinuousScale == TRUE) {
+      if (input$is_continuous_scale == TRUE) {
         shiny::tagList(
-          shiny::textInput('bins', 'Bins (either a number, OR a list. e.g, 20, 30, 40, 50 for bins [20,30], (30,40], (40,50])',
+          shiny::textInput("bins",
+                           "Bins (either a number, OR a list e.g, 20, 30,
+                            40, 50 for bins [20,30], (30,40], (40,50])",
             value = "7"),
-          shiny::textInput('colors', 'Custom colors (must equal number of bins)',
-            value = '',
+          shiny::textInput("colors", "Custom colors (must equal number of bins) \u2014 separate values by commas but no spaces",
+            value = "",
             placeholder = "#EF8A62,#F7F7F7,#67A9CF")
         )
       }
       else {
-        selected <- data()[input$outputColumns]
+        selected <- data()[input$output_columns]
 
-        rangeMin <- floor(min(selected))
-        rangeMax <- ceiling(max(selected))
+        range_min <- floor(min(selected))
+        range_max <- ceiling(max(selected))
 
         shiny::tagList(
-          shiny::sliderInput('threshold', 'Threshold', min = rangeMin, max = rangeMax,
-            value = (rangeMax + rangeMin) / 2, round = TRUE),
-          shiny::textInput('colors', 'Custom colors (must have 2)',
-            value = '',
-            placeholder = '#2E2ECC,#CC2E2E')
+          shiny::sliderInput("threshold", "Threshold", min = range_min, max = range_max,
+            value = (range_max + range_min) / 2, round = TRUE),
+          shiny::textInput("colors", "Custom colors (must have 2) \u2014 separate values by commas but no spaces",
+            value = "",
+            placeholder = "#2E2ECC,#CC2E2E")
         )
       }
     })
 
-    output$titleControls <- shiny::renderUI({
-      if(is.null(data())) {
+    output$title_controls <- shiny::renderUI({
+      if (is.null(data())) {
         return(NULL)
       }
       shiny::tagList(
-        shiny::textInput('xAxisTitle', 'X Axis Name', value = 'Temperature Change'),
-        shiny::selectInput('xAxisUnits', 'X Axis Units', choices = c("Fahrenheit" = "F", "Celsius" = "C", "%")),
-        shiny::textInput('yAxisTitle', 'Y Axis Name', value = 'Precipitaton Change'),
-        shiny::textInput('yAxisUnits', 'Y Axis Units', value = "%"),
-        shiny::numericInput('textSize', 'Text Size', value = 20, min = 6, max = 100),
-        shiny::textInput('zAxisTitle', 'Z Axis Title', value = "Range")
+        shiny::textInput("x_axis_title", "X Axis Name", value = "Temperature Change"),
+        shiny::selectInput("x_axis_units", "X Axis Units", choices = c("Fahrenheit" = "F", "Celsius" = "C", "%")),
+        shiny::textInput("y_axis_title", "Y Axis Name", value = "Precipitaton Change"),
+        shiny::textInput("y_axis_units", "Y Axis Units", value = "%"),
+        shiny::numericInput("text_size", "Text Size", value = 20, min = 6, max = 100),
+        shiny::textInput("z_axis_title", "Z Axis Title", value = "Range")
       )
     })
 
     shiny::observeEvent(input$done, {
-      val <- list(metrics = data(), plot = plot(), gcm_output = gcm_data())
+      val <- list(metrics = data(), gcm = gcm_data(), plot = plot())
+      print("Note: if you forgot to save your results in a variable, they're stored in .Last.value")
 
       shiny::stopApp(val)
     })
@@ -341,7 +319,8 @@ climateResponseAddin <- function() {
 
   shiny::runGadget(ui,
                    server,
-                   viewer = shiny::dialogViewer("Climate Reponse Explorer",
-                                                width = 800,
-                                                height = 1300))
+                   viewer = shiny::paneViewer(minHeight = "maximize"))
+                   # viewer = shiny::dialogViewer("Climate Reponse Explorer",
+                   #                              width = 800,
+                   #                              height = 1300))
 }
