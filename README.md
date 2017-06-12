@@ -9,11 +9,12 @@ is made, or saving to a high resolution figure using
 
 
 ```r 
-df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1)) df$reliability <-
-seq(40,100,length=63) climate_heatmap_continuous(df,"reliability") 
+df <- expand.grid(temp=0:8,precip=seq(0.7,1.3,by=0.1)) 
+df$reliability <- seq(40,100,length=63) 
+climate_heatmap_continuous(df,"reliability") 
 ```
 
-![Continuous plot](inst/continuous.png)
+![Continuous plot](inst/binary.png)
 
 ```r 
 climate_heatmap_binary(df,"reliability") 
