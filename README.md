@@ -24,11 +24,12 @@ climate_heatmap_binary(df,"reliability")
 
 ## Get started
 
-If you haven't yet, install devtools, then use it to install wrviz directly from
+If you haven't yet, install `devtools`, then use it to install `wrviz` directly from
 github.
 
 ```r 
-install.packages("devtools") libray(devtools) 
+install.packages("devtools") 
+libray(devtools) 
 devtools::install_github("tbadams45/wrviz") 
 ```
 
