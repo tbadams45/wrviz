@@ -138,7 +138,6 @@ climateResponseCreator <- function() {
           is.null(input$range_min) ||
           is.null(input$ascending) ||
           is.null(input$bins) ||
-          is.null(input$to_percent_x) ||
           is.null(input$to_percent_y) ||
           is.null(input$range_max)) {
         return(NULL)
@@ -160,7 +159,7 @@ climateResponseCreator <- function() {
           ascending = input$ascending,
           range = c(input$range_min, input$range_max),
           colors = colors,
-          to_percent = c(input$to_percent_x, input$to_percent_y),
+          to_percent = c(FALSE, input$to_percent_y),
           z_axis_title = input$z_axis_title
         )
 
@@ -181,7 +180,7 @@ climateResponseCreator <- function() {
           threshold = as.numeric(input$threshold),
           ascending = input$ascending,
           color_scale = colors,
-          to_percent = c(input$to_percent_x, input$to_percent_y),
+          to_percent = c(FALSE, input$to_percent_y),
           z_axis_title = input$z_axis_title
         )
       }
@@ -204,7 +203,7 @@ climateResponseCreator <- function() {
                       sep = "")
       }
 
-      y_lab <- paste(input$y_axis_title, " (", input$y_axis_units, ")", sep = "")
+      y_lab <- input$y_axis_title
 
       temp_plot <- temp_plot +
         ggplot2::labs(x = x_lab, y = y_lab) +
@@ -264,7 +263,7 @@ climateResponseCreator <- function() {
       if (is.null(data())) {
         return(NULL)
       }
-      shiny::checkboxInput("ascending", "Ascending", value = TRUE)
+      shiny::checkboxInput("ascending", "Invert colors", value = TRUE)
     })
 
     output$format_as_percentage_controls <- shiny::renderUI({
@@ -272,11 +271,8 @@ climateResponseCreator <- function() {
         return(NULL)
       }
       shiny::tagList(
-        shiny::checkboxInput("to_percent_x",
-                             "Format temp as percentage change",
-                             value = FALSE),
         shiny::checkboxInput("to_percent_y",
-                             "Format precip as percentage change",
+                             "Format precipitation as percentage change",
                              value = TRUE)
       )
     })
@@ -304,12 +300,13 @@ climateResponseCreator <- function() {
       if (input$is_continuous_scale == TRUE) {
         shiny::tagList(
           shiny::textInput("bins",
-                           "Bins (either a number, OR a list e.g, 20, 30,
-                            40, 50 for bins [20,30], (30,40], (40,50])",
+                           "Bins",
             value = "7"),
-          shiny::textInput("colors", "Custom colors (must equal number of bins) \u2014 separate values by commas but no spaces",
+          p("You can also enter a list to specify where to cut custom bins. E.g., the list \"20, 30, 40, 50\" will create the bins [20,30], (30,40], (40, 50]."),
+          shiny::textInput("colors", "Custom colors (must equal number of bins)",
             value = "",
-            placeholder = "#EF8A62,#F7F7F7,#67A9CF")
+            placeholder = "#EF8A62,#F7F7F7,#67A9CF"),
+          p("Separate values by commas but no spaces.")
         )
       }
       else {
@@ -321,9 +318,10 @@ climateResponseCreator <- function() {
         shiny::tagList(
           shiny::sliderInput("threshold", "Threshold", min = range_min, max = range_max,
             value = (range_max + range_min) / 2, round = TRUE),
-          shiny::textInput("colors", "Custom colors (must have 2) \u2014 separate values by commas but no spaces",
+          shiny::textInput("colors", "Custom colors (must have 2)",
             value = "",
-            placeholder = "#2E2ECC,#CC2E2E")
+            placeholder = "#2E2ECC,#CC2E2E"),
+          p("Separate values by commas but no spaces.")
         )
       }
     })
@@ -333,12 +331,11 @@ climateResponseCreator <- function() {
         return(NULL)
       }
       shiny::tagList(
-        shiny::textInput("x_axis_title", "X Axis Name", value = "Temperature Change"),
-        shiny::selectInput("x_axis_units", "X Axis Units", choices = c("Fahrenheit" = "F", "Celsius" = "C", "%")),
-        shiny::textInput("y_axis_title", "Y Axis Name", value = "Precipitaton Change"),
-        shiny::textInput("y_axis_units", "Y Axis Units", value = "%"),
-        shiny::numericInput("text_size", "Text Size", value = 20, min = 6, max = 100),
-        shiny::textInput("z_axis_title", "Z Axis Title", value = "Range")
+        shiny::textInput("x_axis_title", "X Axis Title", value = "Temperature Change"),
+        shiny::selectInput("x_axis_units", "X Axis Units", choices = c("Fahrenheit" = "F", "Celsius" = "C", "%"), selected = "C"),
+        shiny::textInput("y_axis_title", "Y Axis Title", value = "Precipitaton Change (%)"),
+        shiny::textInput("z_axis_title", "Z Axis Title", value = "Range"),
+        shiny::numericInput("text_size", "Text Size", value = 20, min = 6, max = 100)
       )
     })
 
