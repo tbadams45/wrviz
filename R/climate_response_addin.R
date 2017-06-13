@@ -14,44 +14,42 @@ climateResponseCreator <- function() {
       miniUI::miniTabPanel("Upload", icon = shiny::icon("upload"),
         miniUI::miniContentPanel(
           shiny::fillCol(
-                shiny::tagList(
-                  shiny::p("Upload a CSV containing a temperature change column, precipitation change column, and however many output metric columns you'd like. Temperature and precipitation columns must be named \"temp\" and \"precip\", respectively. If you intend to overlay GMC data, then your temperature column should be in absolute units, and your precipitation should be in percentage change, where 1 == 0% change, 0.9 represents -10% change, 1.2 represents 20% change, etc."),
-                shiny::p("To include GCM data, upload the raw excel file output from Sungwook's GCM analysis tool. The file name will probably look something like", shiny::em("ProjectName_ClimatolChange_Hist(aaaa-bbbb)_RCP(cccc-dddd).xlsx"), "."),
-                shiny::p("When you're done, hit the done button (yes, really!), and your plot and the data used to build it will be stored in a list. Even if you didn't assign the output to a variable in the console, you can access it using R's built in .Last.value variable."),
-                shiny::uiOutput("upload_complete_notification"),
-                shiny::fileInput("data_file", "Upload temp, precip, metric data",
-                  accept = c(
-                    "text/csv",
-                    "text/comma-separated-values",
-                    "text/tab-separated-values",
-                    "text/plain",
-                    ".csv",
-                    ".tsv"
-                  )
-                ),
-                shiny::fileInput("gcm_file", "Upload GCM data",
-                  accept = c(
-                    "text/csv",
-                    "text/comma-separated-values",
-                    "text/tab-separated-values",
-                    "text/plain",
-                    ".csv",
-                    ".tsv",
-                    ".xlsx",
-                    ".xls"
-                  )
+            shiny::tagList(
+              shiny::p("Upload a CSV containing a temperature change column, precipitation change column, and however many output metric columns you'd like. Temperature and precipitation columns must be named \"temp\" and \"precip\", respectively. If you intend to overlay GMC data, then your temperature column should be in absolute units, and your precipitation should be in percentage change, where 1 == 0% change, 0.9 represents -10% change, 1.2 represents 20% change, etc."),
+              shiny::p("To include GCM data, upload the raw excel file output from Sungwook's GCM analysis tool. The file name will probably look something like", shiny::em("ProjectName_ClimatolChange_Hist(aaaa-bbbb)_RCP(cccc-dddd).xlsx"), "."),
+              shiny::p("When you're done, hit the done button (yes, really!), and your plot and the data used to build it will be stored in a list. Even if you didn't assign the output to a variable in the console, you can access it using R's built in .Last.value variable."),
+              shiny::uiOutput("upload_complete_notification"),
+              shiny::fileInput("data_file", "Upload temp, precip, metric data",
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values",
+                  "text/tab-separated-values",
+                  "text/plain",
+                  ".csv",
+                  ".tsv"
                 )
+              ),
+              shiny::fileInput("gcm_file", "Upload GCM data",
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values",
+                  "text/tab-separated-values",
+                  "text/plain",
+                  ".csv",
+                  ".tsv",
+                  ".xlsx",
+                  ".xls"
                 )
+              ),
+              shiny::actionButton("demo_data", "Use Demo Data")
+            )
           )
         ) # close miniContentPanel
       ), # close miniTabPanel
 
       miniUI::miniTabPanel("Edit", icon = shiny::icon("pencil"),
         miniUI::miniContentPanel(
-          shiny::fillCol(flex = c(2,3),
-            shiny::fillRow(width = "100%", height = "85%", # plot
-              shiny::plotOutput("plot", height = "300px")
-            ),
+          shiny::fillRow(flex = c(3,2),
 
             shiny::fillRow( # outputs
               shiny::fillCol(width = "95%", shiny::tagList(
@@ -68,16 +66,32 @@ climateResponseCreator <- function() {
               shiny::fillCol(width = "95%", shiny::tagList(
                 shiny::uiOutput("title_controls")
               ))
-            )
-            )
+            ),
 
+            shiny::fillRow(width = "100%", height = "85%", # plot
+              shiny::plotOutput("plot", height = "400px")
+            )
+          )
         ) # close miniContentPanel
       ) # close miniTabPanel
     ) # close miniTabstripPanel
   ) # close miniPage
 
   server <- function(input, output, session) {
+    demo_data <- shiny::reactive({
+      if(input$demo_data == 0) {
+        return(NULL)
+      }
+
+      file_name <- system.file("extdata/stresstest_ffd.csv", package = "wrviz")
+      utils::read.csv(file_name, header = TRUE)
+    })
+
+
     data <- shiny::reactive({
+      if(!is.null(demo_data())) {
+        return(demo_data())
+      }
 
       in_file <- input$data_file
 
@@ -90,7 +104,21 @@ climateResponseCreator <- function() {
       csv
     })
 
+    demo_gcm_data <- shiny::reactive({
+      if(input$demo_data == 0) {
+        return(NULL)
+      }
+      file_name <- system.file("extdata/raw_cmip5.xlsx", package = "wrviz")
+      parsed_data <- parse_gcm(file_name)
+      parsed_data
+    })
+
+
     gcm_data <- shiny::reactive({
+      if(!is.null(demo_gcm_data())) {
+        return(demo_gcm_data())
+      }
+
       in_file <- input$gcm_file
 
       if (is.null(in_file)) {
@@ -224,7 +252,12 @@ climateResponseCreator <- function() {
       if (is.null(data())) {
         return(NULL)
       }
-      shiny::checkboxInput("gcm", "Show GCMs", value = FALSE)
+
+      if(is.null(gcm_data())) {
+        shiny::checkboxInput("gcm", "Show GCMs", value = FALSE)
+      } else {
+        shiny::checkboxInput("gcm", "Show GCMs", value = TRUE)
+      }
     })
 
     output$ascending_option <- shiny::renderUI({
@@ -319,8 +352,7 @@ climateResponseCreator <- function() {
 
   shiny::runGadget(ui,
                    server,
-                   viewer = shiny::paneViewer(minHeight = "maximize"))
-                   # viewer = shiny::dialogViewer("Climate Reponse Explorer",
-                   #                              width = 800,
-                   #                              height = 1300))
+                   viewer = shiny::dialogViewer("Climate Reponse Explorer",
+                                                 width = 1200,
+                                                 height = 750))
 }
